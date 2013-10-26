@@ -186,24 +186,13 @@ graph_insert_parents(struct graph *graph)
 		graph_canvas_append_symbol(graph, &symbol);
 	}
 
-	size_t unassigned_parents = 0;
-	int i;
-
 	size_t row_size;
 	for (row_size = 0; row_size < row->size; row_size++) {
-		if (!graph_column_has_commit(&row->columns[row_size])) {
+		if (!graph_column_has_commit(&row->columns[row_size]))
 			break;
-		}
 	}
 
-	for (i = 0; i < parents->size; i++) {
-		size_t match = graph_find_column_by_id(row, parents->columns[i].id);
-
-		if (match >= row_size) {
-			unassigned_parents++;
-		}
-	}
-	for (; pos < row_size + unassigned_parents; pos++) {
+	for (; pos < graph->position + parents->size; pos++) {
 		struct graph_column *old = &row->columns[pos];
 		struct graph_column *new = &parents->columns[pos - graph->position];
 		struct graph_symbol symbol = old->symbol;
@@ -249,6 +238,9 @@ graph_insert_parents(struct graph *graph)
 			row->columns[match] = *new;
 		}
 	}
+
+	if (!graph_column_has_commit(&row->columns[graph->position]))
+		row->columns[graph->position] = parents->columns[0];;
 
 	for (; pos < row->size; pos++) {
 		bool too = !strcmp(row->columns[row->size - 1].id, graph->id);
