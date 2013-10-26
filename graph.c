@@ -229,12 +229,6 @@ graph_insert_parents(struct graph *graph)
 			symbol.merge = 1;
 			if (pos < graph->position + parents->size - 1)
 				symbol.vbranch = 1;
-			if (graph_column_has_commit(old)) {
-				size_t match = graph_find_column_by_id(parents, old->id);
-				if (match != pos)
-					symbol.wide = 1;
-			}
-
 
 		} else if (graph_column_has_commit(old)) {
 			symbol.branch = 1;
@@ -243,13 +237,18 @@ graph_insert_parents(struct graph *graph)
 		graph_canvas_append_symbol(graph, &symbol);
 		if (!graph_column_has_commit(old))
 			new->symbol.color = get_free_graph_color(graph);
-	}
 
-	for (i = 0; i < parents->size; i++) {
-		size_t match = graph_find_column_by_id(row, parents->columns[i].id);
+		if (!strcmp(old->id, graph->id))
+			old->id[0] = 0;
 
-		if (match >= row_size) {
-			row->columns[row_size++] = parents->columns[i];
+		if (graph_column_has_commit(old)) {
+			size_t match = graph_find_column_by_id(row, old->id);
+			row->columns[match] = *old;
+		}
+
+		if (graph_column_has_commit(new)) {
+			size_t match = graph_find_column_by_id(row, new->id);
+			row->columns[match] = *new;
 		}
 	}
 
@@ -333,8 +332,6 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		}
 		if (symbol->vbranch)
 			return "─┬";
-		if (symbol->wide)
-			return "─│";
 		return "─┐";
 	}
 
@@ -377,8 +374,6 @@ graph_symbol_to_chtype(struct graph_symbol *symbol)
 		graphics[0] = ACS_HLINE;
 		if (symbol->branch)
 			graphics[1] = ACS_RTEE;
-		else if (symbol->wide)
-			graphics[1] = ACS_VLINE;
 		else
 			graphics[1] = ACS_URCORNER;
 		return graphics;
@@ -424,8 +419,6 @@ graph_symbol_to_ascii(struct graph_symbol *symbol)
 	if (symbol->merge) {
 		if (symbol->branch)
 			return "-+";
-		if (symbol->wide)
-			return "-|";
 		return "-.";
 	}
 
