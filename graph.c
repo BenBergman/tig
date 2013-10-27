@@ -97,7 +97,7 @@ static bool
 graph_expand(struct graph *graph)
 {
 	while (graph_needs_expansion(graph)) {
-		if (!graph_insert_column(graph, &graph->row, graph->position + graph->expanded, ""))
+		if (!graph_insert_column(graph, &graph->row, graph->row.size, ""))
 			return FALSE;
 		graph->expanded++;
 	}
