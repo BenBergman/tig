@@ -241,8 +241,21 @@ graph_insert_parents(struct graph *graph)
 		}
 	}
 
-	if (!graph_column_has_commit(&row->columns[graph->position]))
-		row->columns[graph->position] = parents->columns[0];;
+	if (!graph_column_has_commit(&row->columns[graph->position])) {
+		size_t min_pos = row->size;
+		struct graph_column *min_commit = &parents->columns[0];
+		int i;
+		for (i = 0; i < graph->parents.size; i++) {
+			if (graph_column_has_commit(&parents->columns[i])) {
+				size_t match = graph_find_column_by_id(row, parents->columns[i].id);
+				if (match < min_pos) {
+					min_pos = match;
+					min_commit = &parents->columns[i];
+				}
+			}
+		}
+		row->columns[graph->position] = *min_commit;
+	}
 
 	for (; pos < row->size; pos++) {
 		bool too = !strcmp(row->columns[row->size - 1].id, graph->id);
@@ -262,6 +275,20 @@ graph_insert_parents(struct graph *graph)
 			}
 		}
 		graph_canvas_append_symbol(graph, &symbol);
+	}
+
+	int del_pos;
+	for (del_pos = pos; del_pos < row->size; del_pos++) {
+		if (!strcmp(row->columns[del_pos].id, graph->id)) {
+			row->columns[del_pos].id[0] = 0;
+		}
+	}
+
+	int i;
+	for (i = row->size - 1; i >= 0; i--) {
+		if (!graph_column_has_commit(&row->columns[i])) {
+			row->columns[i] = *(&row->columns[i+1]);
+		}
 	}
 
 	graph->parents.size = graph->expanded = graph->position = 0;
