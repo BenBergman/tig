@@ -207,10 +207,20 @@ graph_generate_next_row(struct graph *graph)
 	}
 }
 
+static void
+graph_commit_next_row(struct graph *graph)
+{
+	int i;
+	for (i = 0; i < graph->row.size; i++) {
+		graph->row.columns[i] = graph->next_row.columns[i];
+	}
+}
+
 static bool
 graph_insert_parents(struct graph *graph)
 {
 	struct graph_row *row = &graph->row;
+	struct graph_row *next_row = &graph->next_row;
 	struct graph_row *parents = &graph->parents;
 	size_t orig_size = row->size;
 	bool branched = FALSE;
@@ -245,7 +255,7 @@ graph_insert_parents(struct graph *graph)
 
 	for (; pos < graph->position + parents->size; pos++) {
 		struct graph_column *old = &row->columns[pos];
-		struct graph_column *new = &parents->columns[pos - graph->position];
+		struct graph_column *new = &next_row->columns[pos];
 		struct graph_symbol symbol = old->symbol;
 
 		symbol.merge = !!merge;
@@ -277,35 +287,6 @@ graph_insert_parents(struct graph *graph)
 		graph_canvas_append_symbol(graph, &symbol);
 		if (!graph_column_has_commit(old))
 			new->symbol.color = get_free_graph_color(graph);
-
-		if (!strcmp(old->id, graph->id))
-			old->id[0] = 0;
-
-		if (graph_column_has_commit(old)) {
-			size_t match = graph_find_column_by_id(row, old->id);
-			row->columns[match] = *old;
-		}
-
-		if (graph_column_has_commit(new)) {
-			size_t match = graph_find_column_by_id(row, new->id);
-			row->columns[match] = *new;
-		}
-	}
-
-	if (!graph_column_has_commit(&row->columns[graph->position])) {
-		size_t min_pos = row->size;
-		struct graph_column *min_commit = &parents->columns[0];
-		int i;
-		for (i = 0; i < graph->parents.size; i++) {
-			if (graph_column_has_commit(&parents->columns[i])) {
-				size_t match = graph_find_column_by_id(row, parents->columns[i].id);
-				if (match < min_pos) {
-					min_pos = match;
-					min_commit = &parents->columns[i];
-				}
-			}
-		}
-		row->columns[graph->position] = *min_commit;
 	}
 
 	for (; pos < row->size; pos++) {
@@ -328,19 +309,7 @@ graph_insert_parents(struct graph *graph)
 		graph_canvas_append_symbol(graph, &symbol);
 	}
 
-	int del_pos;
-	for (del_pos = pos; del_pos < row->size; del_pos++) {
-		if (!strcmp(row->columns[del_pos].id, graph->id)) {
-			row->columns[del_pos].id[0] = 0;
-		}
-	}
-
-	int i;
-	for (i = row->size - 1; i >= 0; i--) {
-		if (!graph_column_has_commit(&row->columns[i])) {
-			row->columns[i] = *(&row->columns[i+1]);
-		}
-	}
+	graph_commit_next_row(graph);
 
 	graph->parents.size = graph->expanded = graph->position = 0;
 
