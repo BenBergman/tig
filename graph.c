@@ -99,6 +99,8 @@ graph_expand(struct graph *graph)
 	while (graph_needs_expansion(graph)) {
 		if (!graph_insert_column(graph, &graph->row, graph->row.size, ""))
 			return FALSE;
+		if (!graph_insert_column(graph, &graph->next_row, graph->next_row.size, ""))
+			return FALSE;
 		graph->expanded++;
 	}
 
@@ -117,6 +119,7 @@ graph_collapse(struct graph *graph)
 {
 	while (graph_needs_collapsing(graph)) {
 		graph->row.size--;
+		graph->next_row.size--;
 	}
 
 	return TRUE;
@@ -152,6 +155,58 @@ graph_canvas_append_symbol(struct graph *graph, struct graph_symbol *symbol)
 		canvas->symbols[canvas->size++] = *symbol;
 }
 
+static void
+graph_generate_next_row(struct graph *graph)
+{
+	struct graph_row *row = &graph->next_row;
+	struct graph_row *parents = &graph->parents;
+
+	int i;
+	for (i = 0; i <= graph->position; i++) {
+		struct graph_column *old = &row->columns[i];
+		if (!strcmp(old->id, graph->id)) {
+			old->id[0] = 0;
+		}
+	}
+
+	for (i = 0; i < row->size; i++) {
+		struct graph_column *new = &parents->columns[i - graph->position];
+		if (graph_column_has_commit(new)) {
+			size_t match = graph_find_column_by_id(row, new->id);
+			row->columns[match] = *new;
+		}
+	}
+
+	for (i = graph->position; i < row->size; i++) {
+		struct graph_column *old = &row->columns[i];
+		if (!strcmp(old->id, graph->id)) {
+			old->id[0] = 0;
+		}
+	}
+
+	if (!graph_column_has_commit(&row->columns[graph->position])) {
+		size_t min_pos = row->size;
+		struct graph_column *min_commit = &parents->columns[0];
+		int i;
+		for (i = 0; i < graph->parents.size; i++) {
+			if (graph_column_has_commit(&parents->columns[i])) {
+				size_t match = graph_find_column_by_id(row, parents->columns[i].id);
+				if (match < min_pos) {
+					min_pos = match;
+					min_commit = &parents->columns[i];
+				}
+			}
+		}
+		row->columns[graph->position] = *min_commit;
+	}
+
+	for (i = row->size - 1; i >= 0; i--) {
+		if (!graph_column_has_commit(&row->columns[i])) {
+			row->columns[i] = *(&row->columns[i+1]);
+		}
+	}
+}
+
 static bool
 graph_insert_parents(struct graph *graph)
 {
@@ -163,6 +218,8 @@ graph_insert_parents(struct graph *graph)
 	int pos;
 
 	assert(!graph_needs_expansion(graph));
+
+	graph_generate_next_row(graph);
 
 	for (pos = 0; pos < graph->position; pos++) {
 		struct graph_column *column = &row->columns[pos];
@@ -184,12 +241,6 @@ graph_insert_parents(struct graph *graph)
 		}
 
 		graph_canvas_append_symbol(graph, &symbol);
-	}
-
-	size_t row_size;
-	for (row_size = 0; row_size < row->size; row_size++) {
-		if (!graph_column_has_commit(&row->columns[row_size]))
-			break;
 	}
 
 	for (; pos < graph->position + parents->size; pos++) {
