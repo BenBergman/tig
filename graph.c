@@ -217,6 +217,18 @@ graph_commit_next_row(struct graph *graph)
 }
 
 static bool
+is_parent(struct graph *graph, const char *id)
+{
+	int i;
+
+	for (i = 0; i < graph->parents.size; i++) {
+		if (!strcmp(id, graph->parents.columns[i].id))
+			return true;
+	}
+	return false;
+}
+
+static bool
 graph_insert_parents(struct graph *graph)
 {
 	struct graph_row *row = &graph->row;
@@ -273,7 +285,8 @@ graph_insert_parents(struct graph *graph)
 		} else if (graph_column_has_commit(old) && !strcmp(old->id, new->id) && orig_size == row->size) {
 			symbol.vbranch = 1;
 			symbol.branch = 1;
-			//symbol.merge = 1;
+			if (!is_parent(graph, old->id))
+				symbol.merge = 0;
 
 		} else if (parents->size > 1) {
 			symbol.merge = 1;
