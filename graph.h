@@ -49,6 +49,7 @@ struct graph_row {
 struct graph {
 	struct graph_row row;
 	struct graph_row parents;
+	struct graph_row next_row;
 	size_t position;
 	size_t expanded;
 	const char *id;
