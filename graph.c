@@ -275,6 +275,12 @@ graph_insert_parents(struct graph *graph)
 
 		} else if (parents->size > 1) {
 			symbol.merge = 1;
+			if (!graph_column_has_commit(new))
+				symbol.merge = 0;
+			if (!strcmp(old->id, graph->id)) {
+				symbol.branch = 1;
+				symbol.branched = 1;
+			}
 			if (pos < graph->position + parents->size - 1)
 				symbol.vbranch = 1;
 
