@@ -169,7 +169,7 @@ graph_generate_next_row(struct graph *graph)
 		}
 	}
 
-	for (i = 0; i < row->size; i++) {
+	for (i = graph->position; i < row->size; i++) {
 		struct graph_column *new = &parents->columns[i - graph->position];
 		if (graph_column_has_commit(new)) {
 			size_t match = graph_find_column_by_id(row, new->id);
