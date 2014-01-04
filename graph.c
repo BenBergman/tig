@@ -171,7 +171,12 @@ graph_generate_next_row(struct graph *graph)
 		struct graph_column *new = &parents->columns[i];
 		if (graph_column_has_commit(new)) {
 			size_t match = graph_find_column_by_id(row, new->id);
-			row->columns[match] = *new;
+			if (match == row->size) {
+				graph_insert_column(graph, row, row->size, new->id);
+				graph_insert_column(graph, &graph->row, graph->row.size, "");
+			} else {
+				row->columns[match] = *new;
+			}
 		}
 	}
 
