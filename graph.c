@@ -301,6 +301,12 @@ graph_insert_parents(struct graph *graph)
 			}
 			if (pos < graph->position + parents->size - 1)
 				symbol.vbranch = 1;
+			if (!is_parent(graph, new->id)) {
+				symbol.merge = 0;
+				symbol.branch = 1;
+				if (!symbol.branched)
+					symbol.vbranch = 1;
+			}
 
 		} else if (graph_column_has_commit(old)) {
 			symbol.branch = 1;
@@ -327,6 +333,8 @@ graph_insert_parents(struct graph *graph)
 				}
 				row->columns[pos].id[0] = 0;
 			}
+		} else if (parents->size > 1) {
+			symbol.merge = 1;
 		}
 		graph_canvas_append_symbol(graph, &symbol);
 	}
