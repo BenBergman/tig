@@ -161,16 +161,14 @@ graph_generate_next_row(struct graph *graph)
 	struct graph_row *row = &graph->next_row;
 	struct graph_row *parents = &graph->parents;
 
-	int i;
-	for (i = 0; i <= graph->position; i++) {
-		struct graph_column *old = &row->columns[i];
-		if (!strcmp(old->id, graph->id)) {
-			old->id[0] = 0;
-		}
+	struct graph_column *current = &row->columns[graph->position];
+	if (!strcmp(current->id, graph->id)) {
+		current->id[0] = 0;
 	}
 
-	for (i = graph->position; i < row->size; i++) {
-		struct graph_column *new = &parents->columns[i - graph->position];
+	int i;
+	for (i = 0; i < parents->size; i++) {
+		struct graph_column *new = &parents->columns[i];
 		if (graph_column_has_commit(new)) {
 			size_t match = graph_find_column_by_id(row, new->id);
 			row->columns[match] = *new;
