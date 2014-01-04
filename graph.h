@@ -29,6 +29,7 @@ struct graph_symbol {
 
 	unsigned int vbranch:1;
 	unsigned int branched:1;
+	unsigned int collapse:1;
 };
 
 struct graph_canvas {
