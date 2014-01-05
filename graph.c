@@ -478,6 +478,10 @@ graph_symbol_to_chtype(struct graph_symbol *symbol)
 		if (!symbol->vbranch)
 			graphics[0] = ' ';
 		graphics[1] = ACS_VLINE;
+		if (symbol->collapse) {
+			graphics[0] = ' ';
+			graphics[1] = ACS_ULCORNER;
+		}
 		return graphics;
 	}
 
@@ -516,6 +520,8 @@ graph_symbol_to_ascii(struct graph_symbol *symbol)
 		}
 		if (symbol->vbranch)
 			return "-|";
+		if (symbol->collapse)
+			return " .";
 		return " |";
 	}
 
