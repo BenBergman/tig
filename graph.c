@@ -188,8 +188,9 @@ graph_generate_next_row(struct graph *graph)
 	}
 
 	int last = row->size - 1;
-	if (strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
+	while (strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
 		row->columns[last].id[0] = 0;
+		last--;
 	}
 
 	if (!graph_column_has_commit(&row->columns[graph->position])) {
@@ -340,9 +341,17 @@ graph_insert_parents(struct graph *graph)
 			}
 			int i;
 			for (i = pos + 1; i < row->size; i++) {
-				if (strcmp(row->columns[pos].id, row->columns[i].id) == 0 && strcmp(next_row->columns[i].id, row->columns[i].id) != 0) {
-					symbol.collapse = 1;
-					break;
+				if (strcmp(next_row->columns[i].id, row->columns[i].id) != 0) {
+					if (strcmp(row->columns[pos].id, row->columns[i].id) == 0) {
+						symbol.collapse = 1;
+						break;
+					}
+					int parent;
+					for (parent = 0; parent < graph->parents.size; parent++) {
+						if (strcmp(graph->parents.columns[parent].id, next_row->columns[i].id) == 0) {
+							symbol.vbranch = 1;
+						}
+					}
 				}
 			}
 			if (strcmp(row->columns[pos].id, next_row->columns[pos].id) != 0) {
