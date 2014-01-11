@@ -1199,8 +1199,8 @@
 │ │ ● Fix SITES URLs; promote git://repo.or.cz/tig.git mirror more
 │ │ ● Discard error messages from git-describe
 │ │ ● Fix commit author line parsing for when the name is empty
-●─│─│─┐ Merge with master
-│ │ ●─┘ Never split the tree view when opening another tree view
+●─│─┐ Merge with master
+│ │ ● Never split the tree view when opening another tree view
 │ │ ● Cast second arg to iconv to remove warning
 │ │ ● main_read: handle titles that start with whitespace
 │ │ ● Increase commit.title size from 75 to 128
@@ -1208,13 +1208,13 @@
 │ │ ● add_keybinding: always allocate the new keybinding
 │ │ ● tig-0.5.git
 │ ● │ Sync docs
-│ ●─│─┐ Merge with master
-│ │ ●─┘ SITES: Point to pasky's git proxy repo.or.cz
+│ ●─┐ Merge with master
+│ │ ● SITES: Point to pasky's git proxy repo.or.cz
 │ │ ● INSTALL: mention possible iconv problems and workarounds
 │ │ ● manual: document the tree/blob environment variables
 │ ● │ Sync docs
-│ ●─│─┐ Merge with master
-│ │ ●─┘ Always clear the status window after prompting
+│ ●─┐ Merge with master
+│ │ ● Always clear the status window after prompting
 │ │ ● Oops, check log, diff, and show before options
 │ │ ● Use wclrtoeol instead of werase
 │ │ ● Fix clearing of the status window after prompting
@@ -1226,8 +1226,8 @@
 │ │ ● Run the documentation through aspell
 ● │ │ push_rev_graph: iterate all graph revs when looking for duplicates
 │ │ ● BUGS: Merge locale support with utf8-only bug, add horizontal scrolling
-●─│─│─┐ Merge with master
-│ │ ●─┘ Abbreviate the view reference in the view title for small widths
+●─│─┐ Merge with master
+│ │ ● Abbreviate the view reference in the view title for small widths
 │ │ ● update_view_title: format load seconds as part of the state string
 │ │ ● update_view_title: use string_format_from instead of wprintw
 │ │ ● A simple fix of the bad wrapping bugs

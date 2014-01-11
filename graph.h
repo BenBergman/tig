@@ -30,6 +30,18 @@ struct graph_symbol {
 	unsigned int vbranch:1;
 	unsigned int branched:1;
 	unsigned int collapse:1;
+
+	// For new symbol system:
+	unsigned int continued_down:1;
+	unsigned int continued_up:1;
+	unsigned int continued_right:1;
+	unsigned int continued_left:1;
+
+	unsigned int parent_down:1;
+	unsigned int parent_right:1;
+
+	unsigned int flanked:1;
+	unsigned int next_right:1;
 };
 
 struct graph_canvas {
@@ -50,6 +62,7 @@ struct graph_row {
 struct graph {
 	struct graph_row row;
 	struct graph_row parents;
+	struct graph_row prev_row;
 	struct graph_row next_row;
 	size_t position;
 	size_t expanded;
