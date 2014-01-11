@@ -83,36 +83,9 @@ graph_add_parent(struct graph *graph, const char *parent)
 	return graph_insert_column(graph, &graph->parents, graph->parents.size, parent);
 }
 
-static void
-ben_debug_printf(struct graph *graph, const char *format, ...)
-{
-	return;
-//	if (strcmp(graph->id, "19c3ac60ede476130e693ece1752a29fa4e13512") == 0
-////			|| strcmp(graph->id, "158a522c5740123fd1144f9045ef0a419dfcf090") == 0
-////			|| strcmp(graph->id, "aac64c17cd7dd8c6ceba5738cc27a7eee48b8e59") == 0
-//			|| strcmp(graph->id, "A") == 0
-//			|| strcmp(graph->id, "604da3b78777bf69d01d214f203f3be8ee258f67") == 0)
-	{
-		va_list args;
-		va_start (args, format);
-		vprintf (format, args);
-		va_end (args);
-	}
-}
-
-static void
-ben_debug_print_row(struct graph *graph, struct graph_row *row)
-{
-	int i;
-	for (i = 0; i < row->size; i++) {
-		ben_debug_printf(graph, "%s ", row->columns[i].id);
-	}
-}
-
 static bool
 graph_needs_expansion(struct graph *graph)
 {
-//	ben_debug_printf(graph, "g->pos: %d  g->p.s: %d  g->r.s: %d\n", graph->position, graph->parents.size, graph->row.size);
 	return graph->position + graph->parents.size > graph->row.size;
 #if 0
 	return graph->parents.size > 1
@@ -123,7 +96,6 @@ graph_needs_expansion(struct graph *graph)
 static bool
 graph_expand(struct graph *graph)
 {
-//	ben_debug_printf(graph, "Expanding for commit %s...\n", graph->id);
 	while (graph_needs_expansion(graph)) {
 		if (!graph_insert_column(graph, &graph->prev_row, graph->prev_row.size, ""))
 			return FALSE;
@@ -197,13 +169,7 @@ graph_generate_next_row(struct graph *graph)
 		current->id[0] = 0;
 	}
 
-	ben_debug_print_row(graph, row);
-	ben_debug_printf(graph, "<- after first action (clear current id up to and including current pos)\n");
-
 	int i;
-	ben_debug_print_row(graph, row);
-	ben_debug_printf(graph, "<- after first loop (clear duplicate ids)\n");
-
 	for (i = 0; i < parents->size; i++) {
 		struct graph_column *new = &parents->columns[i];
 		if (graph_column_has_commit(new)) {
@@ -217,26 +183,17 @@ graph_generate_next_row(struct graph *graph)
 			}
 		}
 	}
-	ben_debug_print_row(graph, row);
-	ben_debug_printf(graph, "<- after second loop (insert parents)\n");
-
 	for (i = graph->position; i < row->size; i++) {
 		struct graph_column *old = &row->columns[i];
 		if (!strcmp(old->id, graph->id)) {
 			old->id[0] = 0;
 		}
 	}
-	ben_debug_print_row(graph, row);
-	ben_debug_printf(graph, "<- after third loop (clear current id from current position to end of row)\n");
-
 	int last = row->size - 1;
 	while (strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
 		row->columns[last].id[0] = 0;
 		last--;
 	}
-	ben_debug_print_row(graph, row);
-	ben_debug_printf(graph, "<- after removing trailing duplicate id\n");
-
 	if (!graph_column_has_commit(&row->columns[graph->position])) {
 		size_t min_pos = row->size;
 		struct graph_column *min_commit = &parents->columns[0];
@@ -252,9 +209,6 @@ graph_generate_next_row(struct graph *graph)
 		}
 		row->columns[graph->position] = *min_commit;
 	}
-	ben_debug_print_row(graph, row);
-	ben_debug_printf(graph, "<- after emergency copy...?\n");
-
 	for (i = row->size - 1; i >= 0; i--) {
 		if (!graph_column_has_commit(&row->columns[i])) {
 			row->columns[i] = *(&row->columns[i+1]);
@@ -395,16 +349,6 @@ graph_insert_parents(struct graph *graph)
 
 	graph_generate_next_row(graph);
 
-//	ben_debug_print_row(graph, prev_row);
-//	ben_debug_printf(graph, "<- prev_row\n");
-	ben_debug_print_row(graph, row);
-	ben_debug_printf(graph, "<- row\n");
-//	ben_debug_print_row(graph, next_row);
-//	ben_debug_printf(graph, "<- next_row\n");
-
-//	ben_debug_print_row(graph, row);
-//	ben_debug_printf(graph, "<- post next generation\n");
-
 	for (pos = 0; pos < row->size; pos++) {
 		struct graph_column *column = &row->columns[pos];
 		struct graph_symbol symbol = column->symbol;
@@ -430,122 +374,6 @@ graph_insert_parents(struct graph *graph)
 
 		graph_canvas_append_symbol(graph, &symbol);
 	}
-
-//	ben_debug_printf(graph, "Printing parents...\n");
-//	ben_debug_print_row(graph, parents);
-//	ben_debug_printf(graph, "\nparents->size: %d\n", parents->size);
-//	ben_debug_printf(graph, "commits_in_row(parents): %d\n", commits_in_row(parents));
-
-//	for (pos = 0; pos < graph->position; pos++) {
-//		struct graph_column *column = &row->columns[pos];
-//		struct graph_symbol symbol = column->symbol;
-//
-//		if (graph_column_has_commit(column)) {
-//			size_t match = graph_find_column_by_id(parents, column->id);
-//
-//			if (match < parents->size) {
-//				column->symbol.initial = 1;
-//			}
-//
-//			symbol.branch = 1;
-//		}
-//		symbol.vbranch = !!branched;
-//		if (!strcmp(column->id, graph->id)) {
-//			branched = TRUE;
-//			column->id[0] = 0;
-//		}
-//
-//		graph_canvas_append_symbol(graph, &symbol);
-//	}
-//
-//	for (; pos < graph->position + parents->size; pos++) {
-//		struct graph_column *old = &row->columns[pos];
-//		struct graph_column *new = &next_row->columns[pos];
-//		struct graph_symbol symbol = old->symbol;
-//
-//		symbol.merge = !!merge;
-//
-//		if (pos == graph->position) {
-//			symbol.commit = 1;
-//			/*
-//			if (new->symbol->boundary) {
-//				symbol.boundary = 1;
-//			} else*/
-//			if (!graph_column_has_commit(new)) {
-//				symbol.initial = 1;
-//			}
-//
-//		} else if (graph_column_has_commit(old) && !strcmp(old->id, new->id) && orig_size == row->size) {
-//			symbol.vbranch = 1;
-//			symbol.branch = 1;
-//			if (!is_parent(graph, old->id))
-//				symbol.merge = 0;
-//
-//		} else if (parents->size > 1) {
-//			symbol.merge = 1;
-//			if (!graph_column_has_commit(new))
-//				symbol.merge = 0;
-//			if (!strcmp(old->id, graph->id)) {
-//				symbol.branch = 1;
-//				symbol.branched = 1;
-//			}
-//			if (pos < graph->position + parents->size - 1)
-//				symbol.vbranch = 1;
-//			if (!is_parent(graph, new->id)) {
-//				symbol.merge = 0;
-//				symbol.branch = 1;
-//				if (!symbol.branched)
-//					symbol.vbranch = 1;
-//			}
-//
-//		} else if (graph_column_has_commit(old)) {
-//			symbol.branch = 1;
-//		}
-//
-//		graph_canvas_append_symbol(graph, &symbol);
-//		if (!graph_column_has_commit(old))
-//			new->symbol.color = get_free_graph_color(graph);
-//	}
-//
-//	for (; pos < row->size; pos++) {
-//		bool too = !strcmp(row->columns[row->size - 1].id, graph->id);
-//		struct graph_symbol symbol = row->columns[pos].symbol;
-//
-//		symbol.vbranch = !!too;
-//		if (row->columns[pos].id[0]) {
-//			symbol.branch = 1;
-//			if (!strcmp(row->columns[pos].id, graph->id)) {
-//				symbol.branched = 1;
-//				if (too && pos != row->size - 1) {
-//					symbol.vbranch = 1;
-//				} else {
-//					symbol.vbranch = 0;
-//				}
-//				row->columns[pos].id[0] = 0;
-//			}
-//			int i;
-//			for (i = pos + 1; i < row->size; i++) {
-//				if (strcmp(next_row->columns[i].id, row->columns[i].id) != 0) {
-//					if (strcmp(row->columns[pos].id, row->columns[i].id) == 0) {
-//						symbol.collapse = 1;
-//						break;
-//					}
-//					int parent;
-//					for (parent = 0; parent < graph->parents.size; parent++) {
-//						if (strcmp(graph->parents.columns[parent].id, next_row->columns[i].id) == 0) {
-//							symbol.vbranch = 1;
-//						}
-//					}
-//				}
-//			}
-//			if (strcmp(row->columns[pos].id, next_row->columns[pos].id) != 0) {
-//				symbol.branched = 1;
-//			}
-//		} else if (parents->size > 1) {
-//			symbol.merge = 1;
-//		}
-//		graph_canvas_append_symbol(graph, &symbol);
-//	}
 
 	graph_commit_next_row(graph);
 
