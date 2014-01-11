@@ -201,27 +201,19 @@ graph_generate_next_row(struct graph *graph)
 	ben_debug_printf(graph, "<- after first action (clear current id up to and including current pos)\n");
 
 	int i;
-	for (i = 0; i < row->size; i++) {
-		size_t match = graph_find_column_by_id(row, row->columns[i].id);
-		if (match < i)
-			row->columns[i].id[0] = 0;
-	}
 	ben_debug_print_row(graph, row);
 	ben_debug_printf(graph, "<- after first loop (clear duplicate ids)\n");
 
 	for (i = 0; i < parents->size; i++) {
 		struct graph_column *new = &parents->columns[i];
 		if (graph_column_has_commit(new)) {
-			if (row->columns[graph->position].id[0] == 0) {
-				row->columns[graph->position] = *new;
+			size_t match = graph_find_column_by_id(row, new->id);
+			if (match == row->size && row->columns[row->size - 1].id) {
+				graph_insert_column(graph, row, row->size, new->id);
+				graph_insert_column(graph, &graph->row, graph->row.size, "");
+				graph_insert_column(graph, &graph->prev_row, graph->prev_row.size, "");
 			} else {
-				size_t match = graph_find_column_by_id(row, new->id);
-				if (match == row->size) {
-					graph_insert_column(graph, row, row->size, new->id);
-					graph_insert_column(graph, &graph->row, graph->row.size, "");
-				} else {
-					row->columns[match] = *new;
-				}
+				row->columns[match] = *new;
 			}
 		}
 	}
@@ -326,10 +318,10 @@ continued_left(struct graph_row *row, int pos, int commit_pos)
 	if (pos < commit_pos)
 		start = 0;
 	else
-		start = commit_pos + 1;
+		start = commit_pos;
 
 	for (i = start; i < pos; i++)
-		if (strcmp(row->columns[pos].id, row->columns[i].id) == 0)
+		if (graph_column_has_commit(&row->columns[i]) && strcmp(row->columns[pos].id, row->columns[i].id) == 0)
 			return true;
 
 	return false;
@@ -630,6 +622,10 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		return " │";
 	}
 
+	if (symbol->continued_up && symbol->continued_left) {
+		return "─┘";
+	}
+
 	if (symbol->parent_down) {
 		if (symbol->parent_right) {
 			return "─┬";
@@ -638,6 +634,9 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 	}
 
 	if (symbol->parent_right || (symbol->continued_right && symbol->continued_right)) {
+		if (symbol->continued_up) {
+			return "─┴";
+		}
 		return "──";
 	}
 
