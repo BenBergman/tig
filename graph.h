@@ -36,10 +36,12 @@ struct graph_symbol {
 	unsigned int continued_up:1;
 	unsigned int continued_right:1;
 	unsigned int continued_left:1;
+	unsigned int continued_up_left:1;
 
 	unsigned int parent_down:1;
 	unsigned int parent_right:1;
 
+	unsigned int below_commit:1;
 	unsigned int flanked:1;
 	unsigned int next_right:1;
 };
@@ -65,6 +67,7 @@ struct graph {
 	struct graph_row prev_row;
 	struct graph_row next_row;
 	size_t position;
+	size_t prev_position;
 	size_t expanded;
 	const char *id;
 	struct graph_canvas *canvas;

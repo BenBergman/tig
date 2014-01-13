@@ -224,6 +224,7 @@ graph_commit_next_row(struct graph *graph)
 		graph->prev_row.columns[i] = graph->row.columns[i];
 		if (i == graph->position)
 			graph->prev_row.columns[i] = graph->next_row.columns[i];
+		graph->prev_position = graph->position;
 		graph->row.columns[i] = graph->next_row.columns[i];
 	}
 }
@@ -367,6 +368,8 @@ graph_insert_parents(struct graph *graph)
 		symbol.continued_up = continued_down(prev_row, row, pos);
 		symbol.continued_right = continued_right(row, pos, graph->position);
 		symbol.continued_left = continued_left(row, pos, graph->position);
+		symbol.continued_up_left = continued_left(prev_row, pos, prev_row->size);
+		symbol.below_commit = pos == graph->prev_position;
 		symbol.parent_down = parent_down(parents, next_row, pos);
 		symbol.parent_right = (pos > graph->position && parent_right(parents, next_row, pos));
 		symbol.flanked = flanked(row, pos, graph->position);
@@ -447,7 +450,7 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		return " │";
 	}
 
-	if (symbol->continued_up && symbol->continued_left) {
+	if (symbol->continued_up && symbol->continued_left && !symbol->continued_up_left) {
 		return "─┘";
 	}
 
@@ -458,8 +461,8 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		return "─┐";
 	}
 
-	if (symbol->parent_right || (symbol->continued_right && symbol->continued_right)) {
-		if (symbol->continued_up) {
+	if (symbol->parent_right || symbol->continued_right) {
+		if ((symbol->continued_up && !symbol->continued_up_left) || symbol->below_commit) {
 			return "─┴";
 		}
 		return "──";
