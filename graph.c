@@ -424,6 +424,143 @@ graph_add_commit(struct graph *graph, struct graph_canvas *canvas,
 	return TRUE;
 }
 
+const bool
+graph_symbol_forks(struct graph_symbol *symbol)
+{
+	if (!symbol->continued_down)
+		return false;
+
+	if (!symbol->continued_right)
+		return false;
+
+	if (!symbol->continued_up)
+		return false;
+
+	return true;
+}
+
+const bool
+graph_symbol_cross_over(struct graph_symbol *symbol)
+{
+	if (symbol->continued_down) {
+		if (symbol->parent_right)
+			return true;
+
+		if (symbol->flanked)
+			return true;
+	}
+
+	return false;
+}
+
+const bool
+graph_symbol_turn_left(struct graph_symbol *symbol)
+{
+	if (symbol->continued_down)
+		if (symbol->continued_left)
+			return true;
+
+	if (symbol->continued_up)
+		if (symbol->continued_left)
+			if (!symbol->continued_up_left)
+				return true;
+
+	if (!symbol->parent_down)
+		if (!symbol->continued_right)
+			if (!symbol->continued_down)
+				return true;
+
+	return false;
+}
+
+const bool
+graph_symbol_turn_down(struct graph_symbol *symbol)
+{
+	if (!symbol->continued_down)
+		return false;
+
+	if (!symbol->continued_right)
+		return false;
+
+	return true;
+}
+
+const bool
+graph_symbol_merge(struct graph_symbol *symbol)
+{
+	if (symbol->continued_down)
+		return false;
+
+	if (!symbol->parent_down)
+		return false;
+
+	if (symbol->parent_right)
+		return false;
+
+	return true;
+}
+
+const bool
+graph_symbol_multi_merge(struct graph_symbol *symbol)
+{
+	if (!symbol->parent_down)
+		return false;
+
+	if (!symbol->parent_right)
+		return false;
+
+	return true;
+}
+
+const bool
+graph_symbol_vertical_bar(struct graph_symbol *symbol)
+{
+
+	if (!symbol->continued_down)
+		return false;
+
+	if (symbol->parent_right)
+		return false;
+
+	if (symbol->flanked)
+		return false;
+
+	if (symbol->continued_left)
+		return false;
+
+	if (symbol->continued_right)
+		return false;
+
+	return true;
+}
+
+const bool
+graph_symbol_horizontal_bar(struct graph_symbol *symbol)
+{
+	if (!symbol->continued_down)
+		if (symbol->parent_right || symbol->continued_right)
+			if (!(symbol->continued_up && !symbol->continued_up_left))
+				if (!symbol->below_commit)
+					return true;
+
+	return false;
+}
+
+const bool
+graph_symbol_multi_branch(struct graph_symbol *symbol)
+{
+	if (!symbol->continued_down)
+		if (symbol->parent_right || symbol->continued_right) {
+			if ((symbol->continued_up && !symbol->continued_up_left))
+				return true;
+
+			if (symbol->below_commit)
+				return true;
+		}
+
+	return false;
+}
+
 const char *
 graph_symbol_to_utf8(struct graph_symbol *symbol)
 {
@@ -437,72 +574,32 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		return " ●";
 	}
 
-	if (symbol->continued_down) {
-		if (symbol->continued_right) {
-			if (symbol->continued_up) {
-				return " ├";
-			}
-			return " ┌";
-		}
-		if (symbol->parent_right || symbol->flanked) {
-			return "─│";
-		}
-		if (symbol->continued_left) {
-			return "─┘";
-		}
+	if (graph_symbol_vertical_bar(symbol))
 		return " │";
-	}
 
-	if (symbol->continued_up && symbol->continued_left && !symbol->continued_up_left) {
-		return "─┘";
-	}
-
-	if (symbol->parent_down) {
-		if (symbol->parent_right) {
-			return "─┬";
-		}
-		return "─┐";
-	}
-
-	if (symbol->parent_right || symbol->continued_right) {
-		if ((symbol->continued_up && !symbol->continued_up_left) || symbol->below_commit) {
-			return "─┴";
-		}
+	if (graph_symbol_horizontal_bar(symbol))
 		return "──";
-	}
 
-	if (!symbol->continued_right && !symbol->continued_down) {// && symbol->continued_left) {
+	if (graph_symbol_multi_branch(symbol))
+		return "─┴";
+
+	if (graph_symbol_forks(symbol))
+		return " ├";
+
+	if (graph_symbol_cross_over(symbol))
+		return "─│";
+
+	if (graph_symbol_turn_left(symbol))
 		return "─┘";
-	}
 
-	return "  ";
+	if (graph_symbol_turn_down(symbol))
+		return " ┌";
 
-
-
-	if (symbol->merge) {
-		if (symbol->branch) {
-			return "─┤";
-		}
-		if (symbol->vbranch)
-			return "─┬";
+	if (graph_symbol_merge(symbol))
 		return "─┐";
-	}
 
-	if (symbol->branch) {
-		if (symbol->branched) {
-			if (symbol->vbranch)
-				return "─┴";
-			return "─┘";
-		}
-		if (symbol->vbranch)
-			return "─│";
-		if (symbol->collapse)
-			return " ┌";
-		return " │";
-	}
-
-	if (symbol->vbranch)
-		return "──";
+	if (graph_symbol_multi_merge(symbol))
+		return "─┬";
 
 	return "  ";
 }
