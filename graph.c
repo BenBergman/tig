@@ -47,7 +47,7 @@ graph_find_column_by_id(struct graph_row *row, const char *id)
 	size_t i;
 
 	for (i = 0; i < row->size; i++) {
-		if (!graph_column_has_commit(&row->columns[i]))
+		if (!graph_column_has_commit(&row->columns[i]) && free_column == row->size)
 			free_column = i;
 		else if (!strcmp(row->columns[i].id, id))
 			return i;
@@ -170,6 +170,12 @@ graph_generate_next_row(struct graph *graph)
 	}
 
 	int i;
+	for (i = 0; i < row->size; i++) {
+		if (strcmp(row->columns[i].id, graph->id) == 0) {
+			row->columns[i].id[0] = 0;
+		}
+	}
+
 	for (i = 0; i < parents->size; i++) {
 		struct graph_column *new = &parents->columns[i];
 		if (graph_column_has_commit(new)) {
@@ -183,17 +189,20 @@ graph_generate_next_row(struct graph *graph)
 			}
 		}
 	}
+
 	for (i = graph->position; i < row->size; i++) {
 		struct graph_column *old = &row->columns[i];
 		if (!strcmp(old->id, graph->id)) {
 			old->id[0] = 0;
 		}
 	}
+
 	int last = row->size - 1;
 	while (strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
 		row->columns[last].id[0] = 0;
 		last--;
 	}
+
 	if (!graph_column_has_commit(&row->columns[graph->position])) {
 		size_t min_pos = row->size;
 		struct graph_column *min_commit = &parents->columns[0];
@@ -209,6 +218,7 @@ graph_generate_next_row(struct graph *graph)
 		}
 		row->columns[graph->position] = *min_commit;
 	}
+
 	for (i = row->size - 1; i >= 0; i--) {
 		if (!graph_column_has_commit(&row->columns[i])) {
 			row->columns[i] = *(&row->columns[i+1]);

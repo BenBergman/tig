@@ -1,6 +1,6 @@
 ● Fix stupid bug I introduced
 │ ●─┐ On redo-next-row: segfault stuff
-│ ● │ index on redo-next-row: ff10e74 Change some memory management stuff
+│ │ ● index on redo-next-row: ff10e74 Change some memory management stuff
 │ ●─┘ Change some memory management stuff
 ● │ One more fix
 ● │ Another fix
@@ -348,12 +348,12 @@
 ● │ User-defined commands prefixed with '@' are run with no console output
 ● │ Fix mistake in tigrc: line-graphic expects utf8, not utf-8
 ●─│─┐ Merge pull request #37 from v0n/abbrev_commit_hash
-│ │ ● string_copy_rev: chop rev on first space (if any)
-●─│─┘─┐ Merge pull request #36 from tsibley/reload-diff-view-on-toggle
-│ │ ●─┘ Reload the view on a diff-like option change
-│ │ ● Doc typo
-●─│─┘─┐ Merge pull request #34 from tsibley/combined-diff-coloring
-│ │ ●─┘ [GH #32] Only color +/- in the second column when in a combined diff
+┟─│─● string_copy_rev: chop rev on first space (if any)
+●─│─┐ Merge pull request #36 from tsibley/reload-diff-view-on-toggle
+│ │ ● Reload the view on a diff-like option change
+┟─│─● Doc typo
+●─│─┐ Merge pull request #34 from tsibley/combined-diff-coloring
+│ │ ● [GH #32] Only color +/- in the second column when in a combined diff
 ●─│─┘ Only reload the view after changing diff options for diff-like views
 ● │ Document how to submit bugs
 ● │ Move checking for line number display to draw_lineno
@@ -1018,11 +1018,11 @@
 ● │ tig-0.10.1.git
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-│ ● │ Replace SYSCONFDIR value in distributed documentation distributed
-│ │ ● Sync docs
-│ │ ●─┐ Merge branch 'master' into release
-●─┘─┘ │ tig-0.10
-● ┌───┘ Make command line parsing more compatible with gitk
+│ │ ● Replace SYSCONFDIR value in distributed documentation distributed
+│ ● │ Sync docs
+│ ●─│─┐ Merge branch 'master' into release
+●─│─┴─┘ tig-0.10
+● │ Make command line parsing more compatible with gitk
 ● │ Add system-wide configuration file and new config file environment vars
 ● │ Make it possible to overwrite the default (terminal) colors
 ● │ Add support for showing boundary commits in the main view
@@ -1186,8 +1186,8 @@
 │ ● Sync docs
 │ ●─┐ Merge with tig-0.6
 ● │ │ tig-0.6.git
-●─┘ │ Bump the version number to 0.6
-● ┌─┘ Oops, remove -liconv from LDFLAGS
+●─│─┘ Bump the version number to 0.6
+● │ Oops, remove -liconv from LDFLAGS
 ● │ Disable show-rev-graph by default
 ●─│─┐ Merge with master
 │ │ ● Improve handling of remotes
@@ -1199,8 +1199,8 @@
 │ │ ● Fix SITES URLs; promote git://repo.or.cz/tig.git mirror more
 │ │ ● Discard error messages from git-describe
 │ │ ● Fix commit author line parsing for when the name is empty
-●─│─┐ Merge with master
-│ │ ● Never split the tree view when opening another tree view
+●─│─│─┐ Merge with master
+│ │ ●─┘ Never split the tree view when opening another tree view
 │ │ ● Cast second arg to iconv to remove warning
 │ │ ● main_read: handle titles that start with whitespace
 │ │ ● Increase commit.title size from 75 to 128
@@ -1208,13 +1208,13 @@
 │ │ ● add_keybinding: always allocate the new keybinding
 │ │ ● tig-0.5.git
 │ ● │ Sync docs
-│ ●─┐ Merge with master
-│ │ ● SITES: Point to pasky's git proxy repo.or.cz
+│ ●─│─┐ Merge with master
+│ │ ●─┘ SITES: Point to pasky's git proxy repo.or.cz
 │ │ ● INSTALL: mention possible iconv problems and workarounds
 │ │ ● manual: document the tree/blob environment variables
 │ ● │ Sync docs
-│ ●─┐ Merge with master
-│ │ ● Always clear the status window after prompting
+│ ●─│─┐ Merge with master
+│ │ ●─┘ Always clear the status window after prompting
 │ │ ● Oops, check log, diff, and show before options
 │ │ ● Use wclrtoeol instead of werase
 │ │ ● Fix clearing of the status window after prompting
@@ -1226,8 +1226,8 @@
 │ │ ● Run the documentation through aspell
 ● │ │ push_rev_graph: iterate all graph revs when looking for duplicates
 │ │ ● BUGS: Merge locale support with utf8-only bug, add horizontal scrolling
-●─│─┐ Merge with master
-│ │ ● Abbreviate the view reference in the view title for small widths
+●─│─│─┐ Merge with master
+│ │ ●─┘ Abbreviate the view reference in the view title for small widths
 │ │ ● update_view_title: format load seconds as part of the state string
 │ │ ● update_view_title: use string_format_from instead of wprintw
 │ │ ● A simple fix of the bad wrapping bugs
@@ -1310,8 +1310,8 @@
 │ │ ● tigrc(5): Fix keybinding headers
 ● │ │ Use docbook to build manual.pdf; clean *.xml files
 │ ● │ Sync docs
-│ ●─│─┐ Merge with master
-●─│─│─┘ Add sync-docs rule to update docs in the release branch
+┟─● │ Merge with master
+● │ │ Add sync-docs rule to update docs in the release branch
 ● │ │ Manual: fix page up keys
 ● │ │ Add manual link to SITES; improve/fix SEE ALSO sections
 │ ● │ Sync docs
