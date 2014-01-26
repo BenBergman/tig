@@ -5,5 +5,5 @@
 ●─┘ Commit D after F
 ●─┐ Commit F - Merge H into G
 ●─│─┐ Commit G - Merge I into H
-● │ │ Commit I after H
+│ │ ● Commit I after H
 ◎─┴─┘ Commit H

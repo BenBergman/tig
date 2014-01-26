@@ -334,13 +334,14 @@ parent_down(struct graph_row *parents, struct graph_row *next_row, int pos)
 }
 
 static bool
-parent_right(struct graph_row *parents, struct graph_row *next_row, int pos)
+parent_right(struct graph_row *parents, struct graph_row *row, struct graph_row *next_row, int pos)
 {
 	int parent, i;
 	for (parent = 0; parent < parents->size; parent++)
 		if (graph_column_has_commit(&parents->columns[parent]))
 			for (i = pos + 1; i < next_row->size; i++)
 				if (strcmp(parents->columns[parent].id, next_row->columns[i].id) == 0)
+					if (strcmp(parents->columns[parent].id, row->columns[i].id) != 0)
 			//		if (!continued_left(next_row, i, next_row->size))
 						return true;
 
@@ -415,7 +416,7 @@ graph_insert_parents(struct graph *graph)
 		symbol.continued_up_left = continued_left(prev_row, pos, prev_row->size);
 		symbol.below_commit = pos == graph->prev_position;
 		symbol.parent_down = parent_down(parents, next_row, pos);
-		symbol.parent_right = (pos > graph->position && parent_right(parents, next_row, pos));
+		symbol.parent_right = (pos > graph->position && parent_right(parents, row, next_row, pos));
 		symbol.flanked = flanked(row, pos, graph->position);
 		symbol.next_right = continued_right(next_row, pos, 0);
 		symbol.matches_commit = (strcmp(column->id, graph->id) == 0);
@@ -486,13 +487,14 @@ graph_symbol_forks(struct graph_symbol *symbol)
 const bool
 graph_symbol_cross_over(struct graph_symbol *symbol)
 {
-	if (symbol->continued_down) {
-		if (symbol->parent_right)
-			return true;
+	if (!symbol->continued_down)
+		return false;
 
-		if (symbol->flanked)
-			return true;
-	}
+	if (symbol->parent_right)
+		return true;
+
+	if (symbol->flanked)
+		return true;
 
 	return false;
 }
@@ -573,6 +575,9 @@ graph_symbol_multi_merge(struct graph_symbol *symbol)
 const bool
 graph_symbol_vertical_bar(struct graph_symbol *symbol)
 {
+	if (symbol->continued_up)
+		if (symbol->continued_down)
+			return true;
 
 	if (!symbol->continued_down)
 		return false;
@@ -627,14 +632,14 @@ graph_symbol_multi_branch(struct graph_symbol *symbol)
 			return true;
 	}
 
-	if (!symbol->continued_down)
-		if (symbol->parent_right || symbol->continued_right) {
-			if ((symbol->continued_up && !symbol->continued_up_left))
-				return true;
-
-			if (symbol->below_commit)
-				return true;
-		}
+//	if (!symbol->continued_down)
+//		if (symbol->parent_right || symbol->continued_right) {
+//			if ((symbol->continued_up && !symbol->continued_up_left))
+//				return true;
+//
+//			if (symbol->below_commit)
+//				return true;
+//		}
 
 	return false;
 }
@@ -652,23 +657,23 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		return " ●";
 	}
 
+	if (graph_symbol_cross_over(symbol))
+		return "─│";
+
 	if (graph_symbol_vertical_bar(symbol))
 		return " │";
 
 	if (graph_symbol_turn_left(symbol))
 		return "─┘";
 
-	if (graph_symbol_horizontal_bar(symbol))
-		return "──";
-
 	if (graph_symbol_multi_branch(symbol))
 		return "─┴";
 
+	if (graph_symbol_horizontal_bar(symbol))
+		return "──";
+
 	if (graph_symbol_forks(symbol))
 		return " ├";
-
-	if (graph_symbol_cross_over(symbol))
-		return "─│";
 
 	if (graph_symbol_turn_down(symbol))
 		return " ┌";

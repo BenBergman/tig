@@ -2,5 +2,5 @@
 ●─│─┐ Merge branch 'branch2'
 │ ● │ branch3
 │ │ ● branch2
-● ├─┘ branch1
-◎─┘ init
+● │ │ branch1
+◎─┴─┘ init
