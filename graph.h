@@ -47,6 +47,7 @@ struct graph_symbol {
 	unsigned int matches_commit:1;
 	unsigned int shift_left:1;
 	unsigned int new_column:1;
+	unsigned int empty:1;
 };
 
 struct graph_canvas {

@@ -210,11 +210,16 @@ graph_generate_next_row(struct graph *graph)
 		}
 	}
 
-//	int last = row->size - 1;
-//	while (last > graph->position + 1 && strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
-//		row->columns[last].id[0] = 0;
-//		last--;
-//	}
+	int last = row->size - 1;
+	while (
+			last > graph->position + 1
+			&& strcmp(row->columns[last].id, graph->id) != 0
+			&& strcmp(row->columns[last].id, row->columns[last - 1].id) == 0
+			&& strcmp(row->columns[last - 1].id, graph->prev_row.columns[last - 1].id) != 0
+			) {
+		row->columns[last].id[0] = 0;
+		last--;
+	}
 
 	if (!graph_column_has_commit(&row->columns[graph->position])) {
 		size_t min_pos = row->size;
@@ -419,6 +424,7 @@ graph_insert_parents(struct graph *graph)
 		symbol.matches_commit = (strcmp(column->id, graph->id) == 0);
 		symbol.shift_left = shift_left(row, prev_row, pos);
 		symbol.new_column = (!graph_column_has_commit(&prev_row->columns[pos]));
+		symbol.empty = (!graph_column_has_commit(&row->columns[pos]));
 
 		graph_canvas_append_symbol(graph, &symbol);
 	}
@@ -484,6 +490,9 @@ graph_symbol_forks(struct graph_symbol *symbol)
 const bool
 graph_symbol_cross_over(struct graph_symbol *symbol)
 {
+	if (symbol->empty)
+		return false;
+
 	if (!symbol->continued_down)
 		return false;
 
@@ -572,6 +581,9 @@ graph_symbol_multi_merge(struct graph_symbol *symbol)
 const bool
 graph_symbol_vertical_bar(struct graph_symbol *symbol)
 {
+	if (symbol->empty)
+		return false;
+
 	if (symbol->continued_up)
 		if (symbol->continued_down)
 			return true;
