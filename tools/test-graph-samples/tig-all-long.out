@@ -348,10 +348,12 @@
 ● │ User-defined commands prefixed with '@' are run with no console output
 ● │ Fix mistake in tigrc: line-graphic expects utf8, not utf-8
 ●─│─┐ Merge pull request #37 from v0n/abbrev_commit_hash
-┟─│─● string_copy_rev: chop rev on first space (if any)
+│ │ ● string_copy_rev: chop rev on first space (if any)
+├─│─┘
 ●─│─┐ Merge pull request #36 from tsibley/reload-diff-view-on-toggle
 │ │ ● Reload the view on a diff-like option change
-┟─│─● Doc typo
+│ │ ● Doc typo
+├─│─┘
 ●─│─┐ Merge pull request #34 from tsibley/combined-diff-coloring
 │ │ ● [GH #32] Only color +/- in the second column when in a combined diff
 ●─│─┘ Only reload the view after changing diff options for diff-like views
@@ -1310,8 +1312,8 @@
 │ │ ● tigrc(5): Fix keybinding headers
 ● │ │ Use docbook to build manual.pdf; clean *.xml files
 │ ● │ Sync docs
-┟─● │ Merge with master
-● │ │ Add sync-docs rule to update docs in the release branch
+│ ●─│─┐ Merge with master
+●─│─│─┘ Add sync-docs rule to update docs in the release branch
 ● │ │ Manual: fix page up keys
 ● │ │ Add manual link to SITES; improve/fix SEE ALSO sections
 │ ● │ Sync docs
