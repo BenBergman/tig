@@ -56,6 +56,19 @@ graph_find_column_by_id(struct graph_row *row, const char *id)
 	return free_column;
 }
 
+static size_t
+graph_find_free_column(struct graph_row *row)
+{
+	size_t i;
+
+	for (i = 0; i < row->size; i++) {
+		if (!graph_column_has_commit(&row->columns[i]))
+			return i;
+	}
+
+	return row->size;
+}
+
 static struct graph_column *
 graph_insert_column(struct graph *graph, struct graph_row *row, size_t pos, const char *id)
 {
@@ -179,7 +192,7 @@ graph_generate_next_row(struct graph *graph)
 	for (i = 0; i < parents->size; i++) {
 		struct graph_column *new = &parents->columns[i];
 		if (graph_column_has_commit(new)) {
-			size_t match = graph_find_column_by_id(row, new->id);
+			size_t match = graph_find_free_column(row);
 			if (match == row->size && row->columns[row->size - 1].id) {
 				graph_insert_column(graph, row, row->size, new->id);
 				graph_insert_column(graph, &graph->row, graph->row.size, "");
@@ -198,7 +211,7 @@ graph_generate_next_row(struct graph *graph)
 	}
 
 	int last = row->size - 1;
-	while (strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
+	while (last > graph->position + 1 && strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
 		row->columns[last].id[0] = 0;
 		last--;
 	}
