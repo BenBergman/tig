@@ -100,8 +100,8 @@
 ● Move documentation to doc directory
 │ ● Update for version tig-1.2
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-1.2
-● ┌─┘ Remove release-docs/ during distclean
+●─│─┘ tig-1.2
+● │ Remove release-docs/ during distclean
 ● │ Only warn about missing curses configuration once
 ● │ remove useless call to strdup() in get_temp_dir()
 ● │ Move all checks for the log view commit context to log_select
@@ -204,8 +204,8 @@
 ● │ Remove unneeded git update-index call
 │ ● Update for version tig-1.1
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-1.1
-● ┌─┘ [GH #91] Allow to open blob related with added content in a diff
+●─│─┘ tig-1.1
+● │ [GH #91] Allow to open blob related with added content in a diff
 │ │ ● [GH #72] Convert output to ASCII//TRANSLIT unless using ncursesw
 ●─│─┘ Fix status view to show section-level changes in non-lazy navigation mode
 ● │ Fix lazy navigation mode to allow opening the parent tree
@@ -282,11 +282,11 @@
 ● │ Add script to prepare documentation for http://jonas.nitro.dk/tig
 │ ● Update for version tig-1.0
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-1.0
-│ ●─┘ Update for version tig-0.18-138-g4bfaaa2
+●─│─┘ tig-1.0
+│ ● Update for version tig-0.18-138-g4bfaaa2
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ Rework the VERSION mangling in the make dist rule
-● ┌─┘ [GH #49] Increase the author auto-abbreviation threshold to 10
+●─│─┘ Rework the VERSION mangling in the make dist rule
+● │ [GH #49] Increase the author auto-abbreviation threshold to 10
 ● │ [GH #50] Make relative dates show number of years ago for old commits
 ● │ Update the index before showing staged/unstaged changes in the main view
 ● │ Do not count the first line and parent accessor lines in the tree view
@@ -428,8 +428,8 @@
 ● │ Display line numbers in main view
 │ ● Update for version tig-0.18
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.18
-● ┌─┘ Update the view title status after jumping to file diff
+●─│─┘ tig-0.18
+● │ Update the view title status after jumping to file diff
 ● │ [LP-694780][DEB-635546] Expand browsing state variables for prompt commands
 ● │ Promote view_open to pager_open
 ● │ rename graph-line to palette
@@ -497,8 +497,8 @@
 ● │ [GH-3] Expand %(directory) to . for the root directory
 │ ● Update for version tig-0.17
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.17
-● ┌─┘ Rewrite the revision graph renderer
+●─│─┘ tig-0.17
+● │ Rewrite the revision graph renderer
 ● │ Move IO API to src/io.[ch]
 ● │ Move includes, macros and core utilities to tig.h
 ● │ Initialise views and screens with nonzero size.
@@ -514,13 +514,13 @@
 ● │ Improve viewing of diffs when browsing branches
 │ ● Update for version tig-0.16.2
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.16.2
-● ┌─┘ Fix 'tig show <commit>' fix which causes empty tree views
+●─│─┘ tig-0.16.2
+● │ Fix 'tig show <commit>' fix which causes empty tree views
 ● │ Check the ncurses version before using set_tabsize
 │ ● Update for version tig-0.16.1
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.16.1
-● ┌─┘ Fix tig show by replacing %(commit) with %(revargs) on first display
+●─│─┘ tig-0.16.1
+● │ Fix tig show by replacing %(commit) with %(revargs) on first display
 ● │ Use function set_tabsize()
 ● │ Don't show out-of-sight tildes
 ● │ Add an option to ignore unknown directories contents in the status view
@@ -534,8 +534,8 @@
 ● │ Refactor argv_size out from argv_append
 │ ● Update for version tig-0.16
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.16
-● ┌─┘ Fix missing ID reference
+●─│─┘ tig-0.16
+● │ Fix missing ID reference
 ● │ Rename {diff,file,rev}-args to {diff,file,rev}args
 ● │ Load diff arguments from TIG_DIFF_OPTS if defined and no diff args was passed
 ● │ Move application of string_expand to draw_text
@@ -632,8 +632,8 @@
 ● │ Add make rules to install documentation from the release branch
 │ ● Update for version tig-0.15
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.15
-● ┌─┘ Makefile: Fix typo in 157ebf54
+●─│─┘ tig-0.15
+● │ Makefile: Fix typo in 157ebf54
 ● │ Status view: special case revert of unmerged entries with no physical file
 ● │ io_open: take path as a vararg format
 ● │ run_io_rd_dir: obsolete by switching call sites to run_io_rd_dir
@@ -682,8 +682,8 @@
 ● │ Add small cache for author names to reduce memory foot-print
 │ ● Update for version tig-0.14.1
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.14.1
-● ┌─┘ Remove unneeded doupdate from view_driver
+●─│─┘ tig-0.14.1
+● │ Remove unneeded doupdate from view_driver
 ● │ Keep the cursor fixed while initial stage progress is reported
 ● │ Fix draw_lineno to always set the static format buffer
 ● │ Fix bug in draw_space to not access memory outside the space buffer
@@ -730,8 +730,8 @@
 ● │ Cleanup and simplify option file parsing
 │ ● Update for version tig-0.14
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.14
-● ┌─┘ Read tigrc(5) options from git configuration files
+●─│─┘ tig-0.14
+● │ Read tigrc(5) options from git configuration files
 ● │ tig(1): correct info on tree view related environment variables
 ● │ Add release script documenting the release procedure
 ● │ Spell check all text files and add dictionary to speed it up
@@ -810,8 +810,8 @@
 ● │ Cleanup the code by calling realloc_lines in add_line_data
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.13
-● ┌─┘ Launch mergetool from the project root directory
+●─│─┘ tig-0.13
+● │ Launch mergetool from the project root directory
 ● │ Clear the view after 1 second during updates where reading takes long
 ● │ IO API: use select(2) to check if pipe is readable when updating a view
 ● │ IO API: reindent status_run main loop after the rewrite
@@ -857,8 +857,8 @@
 ● │ Cleanup and fix the main loop to make view point to the current view
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ Update and improve the manual
-● ┌─┘ Remove documentation relicts from before the option parsing was changed
+●─│─┘ Update and improve the manual
+● │ Remove documentation relicts from before the option parsing was changed
 ● │ Introduce prefixcmp macro to reduce code verbosity
 ● │ Separate blame revision and file argument by "--" to avoid problems
 ● │ Add bash completion for the blame subcommand
@@ -867,8 +867,8 @@
 ● │ Sort references in the order: tags, heads, tracked remotes, remotes
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.12.1
-● ┌─┘ Rename checkout to revert and support individual diff chunks reverts
+●─│─┘ tig-0.12.1
+● │ Rename checkout to revert and support individual diff chunks reverts
 ● │ Avoid triggering assertion failure when reloading the status view
 ● │ Consolidate and share view resetting via new reset_view()
 ● │ Help view: move requests from the Misc group into separate groups
@@ -894,14 +894,14 @@
 ● │ Add script for preparing release announcements
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.12
-● ┌─┘ Do not show boundary commits by default
+●─│─┘ tig-0.12
+● │ Do not show boundary commits by default
 ● │ main: implement refreshing by just rerunning the original command
 ● │ Continue updates when pipe read has errno "Success"
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ Clean up incomplete commits from main view listed for --no-walk
-● ┌─┘ Remove the global opt_request variable
+●─│─┘ Clean up incomplete commits from main view listed for --no-walk
+● │ Remove the global opt_request variable
 ● │ TODO: Option for abbreviating author names using just the initials
 ● │ Gracefully ignore negative values given to options in ~/.tigrc
 ● │ Add option 'author-width' to consumize the width of the author column
@@ -917,8 +917,8 @@
 ● │ Drop use of $(...) for popen() and system() calls
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ Add NEWS file
-● ┌─┘ Fix warnings emitted with -pedantic
+●─│─┘ Add NEWS file
+● │ Fix warnings emitted with -pedantic
 ● │ Refactor management of the current draw column and max draw width
 ● │ Use draw_field() for the author field
 ● │ Introduce draw_field() helper for drawing main and blame fields
@@ -938,8 +938,8 @@
 ● │ Rebind the maximize action to 'O' instead of 'M'
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.11
-● ┌─┘ Use sans-serif font for the README page
+●─│─┘ tig-0.11
+● │ Use sans-serif font for the README page
 ● │ Update copyright notice for the manual
 ● │ Remove unused blame line attributes
 ● │ Use tables for listing the UI colors
@@ -1003,8 +1003,8 @@
 ● │ 0.11.git
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.10.1
-● ┌─┘ More verbose diff headers (including dates and committer)
+●─│─┘ tig-0.10.1
+● │ More verbose diff headers (including dates and committer)
 ● │ Fix drawing "outside" the screen in the status and pager views
 ● │ Fixed handling of UTF8 tag names and commit messages.
 ● │ Make configure search for the ncursesw library first
@@ -1013,8 +1013,8 @@
 ● │ Fixed spurious "/bin/sh: --list: command not found" error
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ Refresh the index when opening the status view to avoid "empty diffs"
-● ┌─┘ Add rename support to the status view
+●─│─┘ Refresh the index when opening the status view to avoid "empty diffs"
+● │ Add rename support to the status view
 ● │ Make it more clear that use of configure (and autoreconf) is optional
 ● │ Replace SYSCONFDIR value in distributed documentation distributed
 ● │ tig-0.10.1.git
@@ -1060,8 +1060,8 @@
 │ ● Sync docs
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.9.1
-● ┌─┘ SITES: 'Tarballs' is a bit more telling than 'Releases'
+●─│─┘ tig-0.9.1
+● │ SITES: 'Tarballs' is a bit more telling than 'Releases'
 ● │ Cleanup status_request to make it reload the status view by default
 ● │ Add support for launching git-mergetool from the status view
 ● │ Refactor code to open_external_viewer
@@ -1083,13 +1083,13 @@
 ● │ tig-0.9.1.git
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.9
-● ┌─┘ Change the default styles for the status view
+●─│─┘ tig-0.9
+● │ Change the default styles for the status view
 ● │ Update documentation
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ Force adding of doc files in the release-doc rule
-● ┌─┘ Fix INSTALL
+●─│─┘ Force adding of doc files in the release-doc rule
+● │ Fix INSTALL
 ● │ Build intermediate tig.o file to fix tig dependency on config.h
 ● │ Ensure ICONV_INBUF_TYPE is always defined; fix GIT_CONFIG define
 ● │ Guard config.h include with HAVE_CONFIG_H
@@ -1138,8 +1138,8 @@
 ● │ tig-0.8.git
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.8
-● ┌─┘ Fix pager mode regressions
+●─│─┘ tig-0.8
+● │ Fix pager mode regressions
 ● │ Fix (another) integer type mismatch on 64-bit systems
 ● │ Fix integer type mismatch on 64-bit systems
 ● │ Add TODO about using non-blocking I/O for incremental view loading
@@ -1160,12 +1160,12 @@
 ● │ tig-0.7.git
 │ ● Sync docs
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ tig-0.7
-● ┌─┘ Rename sync-docs to release-doc; add release-dist rule
+●─│─┘ tig-0.7
+● │ Rename sync-docs to release-doc; add release-dist rule
 ● │ Various random Makefile cleanups
 │ ●─┐ Merge branch 'master' into release
-●─┘ │ Update sync-docs target to use git porcelain instead of cogito
-● ┌─┘ Infrastructure for tig rpm builds
+●─│─┘ Update sync-docs target to use git porcelain instead of cogito
+● │ Infrastructure for tig rpm builds
 ● │ Move "static" version info to VERSION file
 ● │ Add version information to man pages
 ● │ Add manpage XSL from git and enhance with literallayout fixes
@@ -1299,8 +1299,8 @@
 ● │ Add .gitignore file
 │ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ prompt: make ':show <id>' use the diff view
-● ┌─┘ Add support for converting from git encoding to locale encoding
+●─│─┘ prompt: make ':show <id>' use the diff view
+● │ Add support for converting from git encoding to locale encoding
 ● │ Pass --root to git-show so the diff command will show the initial commit
 ● │ Silence stderr for all view commands
 ● │ Improve handling of 'bogus' author lines
@@ -1322,8 +1322,8 @@
 ● │ Use tables for the listing of default keybindings
 │ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ Documentation update
-● ┌─┘ Add "Hash" key name mapped to "#"; Don't use ";" as a comment character
+●─│─┘ Documentation update
+● │ Add "Hash" key name mapped to "#"; Don't use ";" as a comment character
 ● │ Allow strings to be enclosed in either ' or "
 ● │ Make prompt use internal user input reader
 ●─│─┐ Merge with ssh://diku/~/tig
@@ -1345,8 +1345,8 @@
 ● │ Make declaration of die() specify the __NORETURN attribute
 │ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ Improve error reporting for unknown options
-● ┌─┘ Add feature request for showing nearest branch heads or tags for a commit
+●─│─┘ Improve error reporting for unknown options
+● │ Add feature request for showing nearest branch heads or tags for a commit
 ● │ Makefile: make customization of installation locations easier
 ● │ Make the view title show percentage shown like less
 ● │ Implement the basic controlling of revision graph visualization
@@ -1368,8 +1368,8 @@
 ● │ Fix segfault where current_view would become >= sizeof(display)
 │ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ Remove SITES title so it is more adaptive to where it is included
-● ┌─┘ Split out manual material to separate file
+●─│─┘ Remove SITES title so it is more adaptive to where it is included
+● │ Split out manual material to separate file
 ● │ List SITES in tig(1)
 ● │ Move stuff to SITES and INSTALL files
 ● │ Move stuff to BUGS and TODO files; only show BUGS in tig(1)
@@ -1416,8 +1416,8 @@
 ● │ End the current update before begining a new one; fixes CPU hogging
 │ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ Bind 'j'/'k' to moving up/down; add next/previous requests bound to Down/Up
-● ┌─┘ Move struct commit to appear just above the main view backend
+●─│─┘ Bind 'j'/'k' to moving up/down; add next/previous requests bound to Down/Up
+● │ Move struct commit to appear just above the main view backend
 ● │ Add -O2 to CFLAGS to get more warnings
 ● │ Cache all queries for refs based on ID
 ● │ Move git directory assertion to main; don't require .git repo in pager mode
@@ -1445,37 +1445,37 @@
 ● │ Minor documentation updates
 │ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ Fix warnings
-● ┌─┘ Fix linking with --as-needed ld(1) option.
+●─│─┘ Fix warnings
+● │ Fix linking with --as-needed ld(1) option.
 ● │ Minor doc and coding style fixes
 ● │ Mark quit() and die() __noreturn
 ● │ Make some strings "const"
 │ ●─┐ Merge with master
-●─┘ │ tig version 0.3
-│ ●─┘ Sync docs
+●─│─┘ tig version 0.3
+│ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ Minor documentation fixes; nothing from git-ls-remote means no git repo
-│ ●─┘ Sync docs
+●─│─┘ Minor documentation fixes; nothing from git-ls-remote means no git repo
+│ ● Sync docs
 │ ●─┐ Merge with master
-●─┘ │ After seeing Linus' mail further improve revision specification section
-● ┌─┘ Make the last variables static
+●─│─┘ After seeing Linus' mail further improve revision specification section
+● │ Make the last variables static
 │ ● Fix File history section
 │ ●─┐ Merge with master
-●─┘ │ Fix File history section number
-│ ●─┘ Update generated docs
+●─│─┘ Fix File history section number
+│ ● Update generated docs
 │ ●─┐ Merge with master
-●─┘ │ Minor fixes
-│ ●─┘ Merge with master
-● │ Only tig(1) is required by the help view
+●─│─┘ Minor fixes
 │ ●─┐ Merge with master
-●─┘ │ Only set VERSION to git-describe if .git is available
-│ ●─┘ Put documentation in a branch named release
+●─│─┘ Only tig(1) is required by the help view
 │ ●─┐ Merge with master
-●─┘ │ Put documentation in a branch named release
-│ ●─┘ Add README.html
+●─│─┘ Only set VERSION to git-describe if .git is available
+│ ● Put documentation in a branch named release
 │ ●─┐ Merge with master
-●─┘ │ You gotta have a README file
-│ ●─┘ Create documentation branch
+●─│─┘ Put documentation in a branch named release
+│ ● Add README.html
+│ ●─┐ Merge with master
+●─│─┘ You gotta have a README file
+│ ● Create documentation branch
 ●─┘ Document file history rev limiting
 ● ... and yet more doc ups
 ● Check spelling
