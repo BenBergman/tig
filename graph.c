@@ -210,11 +210,11 @@ graph_generate_next_row(struct graph *graph)
 		}
 	}
 
-	int last = row->size - 1;
-	while (last > graph->position + 1 && strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
-		row->columns[last].id[0] = 0;
-		last--;
-	}
+//	int last = row->size - 1;
+//	while (last > graph->position + 1 && strcmp(row->columns[last].id, graph->id) != 0 && strcmp(row->columns[last].id, row->columns[last - 1].id) == 0) {
+//		row->columns[last].id[0] = 0;
+//		last--;
+//	}
 
 	if (!graph_column_has_commit(&row->columns[graph->position])) {
 		size_t min_pos = row->size;
@@ -274,6 +274,23 @@ continued_down(struct graph_row *row, struct graph_row *next_row, int pos)
 }
 
 static bool
+shift_left(struct graph_row *row, struct graph_row *prev_row, int pos)
+{
+	int i;
+	if (!graph_column_has_commit(&row->columns[pos]))
+		return false;
+
+	for (i = pos - 1; i >= 0; i--) {
+		if (graph_column_has_commit(&row->columns[i]))
+			if (strcmp(row->columns[i].id, row->columns[pos].id) == 0)
+				if (!continued_down(prev_row, row, i))
+					return true;
+	}
+
+	return false;
+}
+
+static bool
 continued_right(struct graph_row *row, int pos, int commit_pos)
 {
 	int i, end;
@@ -321,10 +338,11 @@ parent_right(struct graph_row *parents, struct graph_row *next_row, int pos)
 {
 	int parent, i;
 	for (parent = 0; parent < parents->size; parent++)
-		for (i = pos + 1; i < next_row->size; i++)
-			if (graph_column_has_commit(&parents->columns[parent]) && strcmp(parents->columns[parent].id, next_row->columns[i].id) == 0)
-				if (!continued_left(next_row, i, next_row->size))
-					return true;
+		if (graph_column_has_commit(&parents->columns[parent]))
+			for (i = pos + 1; i < next_row->size; i++)
+				if (strcmp(parents->columns[parent].id, next_row->columns[i].id) == 0)
+			//		if (!continued_left(next_row, i, next_row->size))
+						return true;
 
 	return false;
 }
@@ -400,6 +418,9 @@ graph_insert_parents(struct graph *graph)
 		symbol.parent_right = (pos > graph->position && parent_right(parents, next_row, pos));
 		symbol.flanked = flanked(row, pos, graph->position);
 		symbol.next_right = continued_right(next_row, pos, 0);
+		symbol.matches_commit = (strcmp(column->id, graph->id) == 0);
+		symbol.shift_left = shift_left(row, prev_row, pos);
+		symbol.new_column = (!graph_column_has_commit(&prev_row->columns[pos]));
 
 		graph_canvas_append_symbol(graph, &symbol);
 	}
@@ -480,18 +501,32 @@ const bool
 graph_symbol_turn_left(struct graph_symbol *symbol)
 {
 	if (symbol->continued_down)
-		if (symbol->continued_left)
+		return false;
+
+	if (symbol->continued_right)
+		return false;
+
+	if (symbol->continued_up || symbol->new_column || symbol->below_commit) {
+		if (symbol->matches_commit)
 			return true;
 
-	if (symbol->continued_up)
-		if (symbol->continued_left)
-			if (!symbol->continued_up_left)
-				return true;
+		if (symbol->shift_left)
+			return true;
+	}
 
-	if (!symbol->parent_down)
-		if (!symbol->continued_right)
-			if (!symbol->continued_down)
-				return true;
+//	if (symbol->continued_down)
+//		if (symbol->continued_left)
+//			return true;
+//
+//	if (symbol->continued_up)
+//		if (symbol->continued_left)
+//			if (!symbol->continued_up_left)
+//				return true;
+//
+//	if (!symbol->parent_down)
+//		if (!symbol->continued_right)
+//			if (!symbol->continued_down)
+//				return true;
 
 	return false;
 }
@@ -560,11 +595,17 @@ graph_symbol_vertical_bar(struct graph_symbol *symbol)
 const bool
 graph_symbol_horizontal_bar(struct graph_symbol *symbol)
 {
-	if (!symbol->continued_down)
-		if (symbol->parent_right || symbol->continued_right)
-			if (!(symbol->continued_up && !symbol->continued_up_left))
-				if (!symbol->below_commit)
-					return true;
+	if (symbol->continued_down)
+		return false;
+
+	if (!symbol->parent_right && !symbol->continued_right)
+		return false;
+
+	if ((symbol->continued_up && !symbol->continued_up_left))
+		return false;
+
+	if (!symbol->below_commit)
+		return true;
 
 	return false;
 }
@@ -572,6 +613,20 @@ graph_symbol_horizontal_bar(struct graph_symbol *symbol)
 const bool
 graph_symbol_multi_branch(struct graph_symbol *symbol)
 {
+	if (symbol->continued_down)
+		return false;
+
+	if (!symbol->continued_right)
+		return false;
+
+	if (symbol->continued_up || symbol->new_column || symbol->below_commit) {
+		if (symbol->matches_commit)
+			return true;
+
+		if (symbol->shift_left)
+			return true;
+	}
+
 	if (!symbol->continued_down)
 		if (symbol->parent_right || symbol->continued_right) {
 			if ((symbol->continued_up && !symbol->continued_up_left))
@@ -600,6 +655,9 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 	if (graph_symbol_vertical_bar(symbol))
 		return " │";
 
+	if (graph_symbol_turn_left(symbol))
+		return "─┘";
+
 	if (graph_symbol_horizontal_bar(symbol))
 		return "──";
 
@@ -611,9 +669,6 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 
 	if (graph_symbol_cross_over(symbol))
 		return "─│";
-
-	if (graph_symbol_turn_left(symbol))
-		return "─┘";
 
 	if (graph_symbol_turn_down(symbol))
 		return " ┌";
