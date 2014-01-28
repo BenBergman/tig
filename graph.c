@@ -211,14 +211,12 @@ graph_generate_next_row(struct graph *graph)
 	}
 
 	int last = row->size - 1;
-	while (
-			last > graph->position + 1
-			&& strcmp(row->columns[last].id, graph->id) != 0
-			&& strcmp(row->columns[last].id, row->columns[last - 1].id) == 0
-			&& strcmp(row->columns[last - 1].id, graph->prev_row.columns[last - 1].id) != 0
-			) {
-		row->columns[last].id[0] = 0;
-		last--;
+	for (last = row->size; last > 0; last--) {
+		if (last != graph->position + 1)
+			if (strcmp(row->columns[last].id, graph->id) != 0)
+				if (strcmp(row->columns[last].id, row->columns[last - 1].id) == 0)
+					if (strcmp(row->columns[last - 1].id, graph->prev_row.columns[last - 1].id) != 0)
+						row->columns[last] = row->columns[last + 1];
 	}
 
 	if (!graph_column_has_commit(&row->columns[graph->position])) {
