@@ -599,9 +599,6 @@ graph_symbol_vertical_bar(struct graph_symbol *symbol)
 	if (symbol->flanked)
 		return false;
 
-	if (symbol->continued_left)
-		return false;
-
 	if (symbol->continued_right)
 		return false;
 
