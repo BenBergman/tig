@@ -354,7 +354,7 @@ parent_right(struct graph_row *parents, struct graph_row *row, struct graph_row 
 }
 
 static bool
-flanked(struct graph_row *row, int pos, int commit_pos)
+flanked(struct graph_row *row, int pos, int commit_pos, const char *commit_id)
 {
 	int before, after;
 	int min = 0;
@@ -367,7 +367,7 @@ flanked(struct graph_row *row, int pos, int commit_pos)
 	for (before = min; before < pos; before++)
 		for (after = pos + 1; after < max; after++)
 			if (strcmp(row->columns[before].id, row->columns[after].id) == 0)
-				if (strcmp(row->columns[before].id, row->columns[pos].id) != 0)
+				if (strcmp(row->columns[before].id, commit_id) == 0)
 					return true;
 
 	return false;
@@ -423,7 +423,7 @@ graph_insert_parents(struct graph *graph)
 		symbol.below_commit = pos == graph->prev_position;
 		symbol.parent_down = parent_down(parents, next_row, pos);
 		symbol.parent_right = (pos > graph->position && parent_right(parents, row, next_row, pos));
-		symbol.flanked = flanked(row, pos, graph->position);
+		symbol.flanked = flanked(row, pos, graph->position, graph->id);
 		symbol.next_right = continued_right(next_row, pos, 0);
 		symbol.matches_commit = (strcmp(column->id, graph->id) == 0);
 		symbol.shift_left = shift_left(row, prev_row, pos);
