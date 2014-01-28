@@ -17,18 +17,40 @@
 DEFINE_ALLOCATOR(realloc_graph_columns, struct graph_column, 32)
 DEFINE_ALLOCATOR(realloc_graph_symbols, struct graph_symbol, 1)
 
-//static size_t get_free_graph_color(struct graph *graph)
-//{
-//	size_t i, free_color;
-//
-//	for (free_color = i = 0; i < ARRAY_SIZE(graph->colors); i++) {
-//		if (graph->colors[i] < graph->colors[free_color])
-//			free_color = i;
-//	}
-//
-//	graph->colors[free_color]++;
-//	return free_color;
-//}
+static size_t get_color(struct graph *graph, char *new_id)
+{
+	size_t color, id;
+
+	size_t free_color = 0;
+	size_t free_position = ARRAY_SIZE(graph->color_ids[0]);
+
+	if (new_id == NULL || new_id[0] == 0)
+		return 0;
+
+	for (free_color = color = 0; color < ARRAY_SIZE(graph->colors); color++) {
+		size_t empty = ARRAY_SIZE(graph->color_ids[color]);
+		for (id = 0; id < ARRAY_SIZE(graph->color_ids[color]); id++) {
+			if (!(graph->color_ids[color][id]) || !(graph->color_ids[color][id][0])) {
+				if (empty > id)
+					empty = id;
+
+			} else if (strcmp(new_id, graph->color_ids[color][id]) == 0) {
+				return color;
+			}
+		}
+		if (graph->colors[color] <= graph->colors[free_color]) {
+			free_color = color;
+			free_position = empty;
+		}
+	}
+
+	if (free_position < ARRAY_SIZE(graph->color_ids[free_color])) {
+		graph->color_ids[free_color][free_position] = new_id;
+		graph->colors[free_color]++;
+	}
+
+	return free_color;
+}
 
 void
 done_graph(struct graph *graph)
@@ -427,6 +449,8 @@ graph_insert_parents(struct graph *graph)
 		symbol.shift_left = shift_left(row, prev_row, pos);
 		symbol.new_column = (!graph_column_has_commit(&prev_row->columns[pos]));
 		symbol.empty = (!graph_column_has_commit(&row->columns[pos]));
+
+		symbol.color = get_color(graph, column->id);
 
 		graph_canvas_append_symbol(graph, &symbol);
 	}

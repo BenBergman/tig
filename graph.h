@@ -76,6 +76,7 @@ struct graph {
 	const char *id;
 	struct graph_canvas *canvas;
 	size_t colors[GRAPH_COLORS];
+	char *color_ids[GRAPH_COLORS][40];
 	bool has_parents;
 	bool is_boundary;
 };
