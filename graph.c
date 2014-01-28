@@ -212,7 +212,7 @@ graph_generate_next_row(struct graph *graph)
 
 	int last = row->size - 1;
 	for (last = row->size; last > 0; last--) {
-		if (last != graph->position + 1)
+		if (last != graph->position + 1 && last != graph->position)
 			if (strcmp(row->columns[last].id, graph->id) != 0)
 				if (strcmp(row->columns[last].id, row->columns[last - 1].id) == 0)
 					if (strcmp(row->columns[last - 1].id, graph->prev_row.columns[last - 1].id) != 0)
