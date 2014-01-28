@@ -367,7 +367,8 @@ flanked(struct graph_row *row, int pos, int commit_pos)
 	for (before = min; before < pos; before++)
 		for (after = pos + 1; after < max; after++)
 			if (strcmp(row->columns[before].id, row->columns[after].id) == 0)
-				return true;
+				if (strcmp(row->columns[before].id, row->columns[pos].id) != 0)
+					return true;
 
 	return false;
 }
