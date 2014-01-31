@@ -14,6 +14,8 @@
 #ifndef TIG_GRAPH_H
 #define TIG_GRAPH_H
 
+#include "hashtab.h"
+
 #define GRAPH_COLORS	7
 
 struct graph_symbol {
@@ -65,6 +67,11 @@ struct graph_row {
 	struct graph_column *columns;
 };
 
+struct colors {
+	htab_t id_map;
+	size_t count[GRAPH_COLORS];
+};
+
 struct graph {
 	struct graph_row row;
 	struct graph_row parents;
@@ -75,11 +82,12 @@ struct graph {
 	size_t expanded;
 	const char *id;
 	struct graph_canvas *canvas;
-	size_t colors[GRAPH_COLORS];
-	char *color_ids[GRAPH_COLORS][40];
+	struct colors colors;
 	bool has_parents;
 	bool is_boundary;
 };
+
+void colors_init(struct colors *colors);
 
 void done_graph(struct graph *graph);
 

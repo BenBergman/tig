@@ -17,39 +17,127 @@
 DEFINE_ALLOCATOR(realloc_graph_columns, struct graph_column, 32)
 DEFINE_ALLOCATOR(realloc_graph_symbols, struct graph_symbol, 1)
 
-static size_t get_color(struct graph *graph, char *new_id)
+struct id_color {
+	char *id;
+	size_t color;
+};
+
+struct id_color *
+id_color_new(const char *id, size_t color)
 {
-	size_t color, id;
+	struct id_color *node = malloc(sizeof(struct id_color));
+	node->id = (char *) malloc(strlen(id) + 1);
+	strcpy(node->id, id);
+	node->color = color;
 
+	return node;
+}
+
+static void
+id_color_delete(struct id_color *node)
+{
+	free(node->id);
+	free(node);
+}
+
+static int
+id_color_eq(const void *entry, const void *element)
+{
+	return strcmp(((const struct id_color *) entry)->id, ((const struct id_color *) element)->id) == 0;
+}
+
+static void
+key_del(void *key)
+{
+	id_color_delete((struct id_color *) key);
+}
+
+static hashval_t
+id_color_hash(const void *node)
+{
+	return htab_hash_string(((const struct id_color*) node)->id);
+}
+
+static void
+colors_add_id(struct colors *colors, const char *id, const size_t color)
+{
+	struct id_color *node = id_color_new(id, color);
+	void **slot = htab_find_slot(colors->id_map, node, INSERT);
+
+	if (slot != NULL && *slot == NULL) {
+		*slot = node;
+		colors->count[color]++;
+	} else {
+		id_color_delete(node);
+	}
+}
+
+static void
+colors_remove_id(struct colors *colors, const char *id)
+{
+	struct id_color *node = id_color_new(id, 0);
+	void **slot = htab_find_slot(colors->id_map, node, NO_INSERT);
+
+	if (slot != NULL && *slot != NULL) {
+		colors->count[((struct id_color *) *slot)->color]--;
+		htab_clear_slot(colors->id_map, slot);
+	}
+
+	id_color_delete(node);
+}
+
+static size_t
+colors_get_color(struct colors *colors, const char *id)
+{
+	struct id_color *key = id_color_new(id, 0);
+	struct id_color *node = (struct id_color *) htab_find(colors->id_map, key);
+	id_color_delete(key);
+
+	if (node == NULL) {
+		return (size_t) -1; // Max value of size_t. ID not found.
+	}
+	return node->color;
+}
+
+static size_t
+colors_get_free_color(struct colors *colors)
+{
 	size_t free_color = 0;
-	size_t free_position = ARRAY_SIZE(graph->color_ids[0]);
-
-	if (new_id == NULL || new_id[0] == 0)
-		return 0;
-
-	for (free_color = color = 0; color < ARRAY_SIZE(graph->colors); color++) {
-		size_t empty = ARRAY_SIZE(graph->color_ids[color]);
-		for (id = 0; id < ARRAY_SIZE(graph->color_ids[color]); id++) {
-			if (!(graph->color_ids[color][id]) || !(graph->color_ids[color][id][0])) {
-				if (empty > id)
-					empty = id;
-
-			} else if (strcmp(new_id, graph->color_ids[color][id]) == 0) {
-				return color;
-			}
-		}
-		if (graph->colors[color] <= graph->colors[free_color]) {
-			free_color = color;
-			free_position = empty;
+	size_t lowest = (size_t) -1; // Max value of size_t
+	int i;
+	for (i = 0; i < ARRAY_SIZE(colors->count); i++) {
+		if (colors->count[i] < lowest) {
+			lowest = colors->count[i];
+			free_color = i;
 		}
 	}
-
-	if (free_position < ARRAY_SIZE(graph->color_ids[free_color])) {
-		graph->color_ids[free_color][free_position] = new_id;
-		graph->colors[free_color]++;
-	}
-
 	return free_color;
+}
+
+void
+colors_init(struct colors *colors)
+{
+	if (colors->id_map == NULL) {
+		uint size = 500;
+		colors->id_map = htab_create_alloc(size, id_color_hash, id_color_eq, key_del, calloc, free);
+	}
+}
+
+static size_t
+get_color(struct graph *graph, char *new_id)
+{
+	colors_init(&graph->colors);
+	size_t color = colors_get_color(&graph->colors, new_id);
+
+	if (color < (size_t) -1) {
+		return color;
+	}
+
+	color = colors_get_free_color(&graph->colors);
+
+	colors_add_id(&graph->colors, new_id, color);
+
+	return color;
 }
 
 void
@@ -450,12 +538,17 @@ graph_insert_parents(struct graph *graph)
 		symbol.new_column = (!graph_column_has_commit(&prev_row->columns[pos]));
 		symbol.empty = (!graph_column_has_commit(&row->columns[pos]));
 
-		symbol.color = get_color(graph, column->id);
+		char *id = next_row->columns[pos].id;
+		if (graph_column_has_commit(column)) {
+			id = column->id;
+		}
+		symbol.color = get_color(graph, id);
 
 		graph_canvas_append_symbol(graph, &symbol);
 	}
 
 	graph_commit_next_row(graph);
+	colors_remove_id(&graph->colors, graph->id);
 
 	graph->parents.size = graph->expanded = graph->position = 0;
 

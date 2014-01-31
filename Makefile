@@ -37,7 +37,7 @@ RPM_VERSION = $(word 1,$(RPM_VERLIST))
 RPM_RELEASE = $(word 2,$(RPM_VERLIST))$(if $(WTDIRTY),.dirty)
 
 LDLIBS ?= -lcurses
-CFLAGS ?= -g -Wall
+CFLAGS ?= -Wall -O2
 DFLAGS	= -g -DDEBUG -Werror -O0
 EXE	= tig
 TOOLS	= tools/test-graph
@@ -175,12 +175,15 @@ COMPAT_CPPFLAGS += -DNO_SETENV
 COMPAT_OBJS += compat/setenv.o
 endif
 
-override CPPFLAGS += $(COMPAT_CPPFLAGS)
+HASHTAB_CPPFLAGS = -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STDINT_H
+HASHTAB_OBJS = hashtab.o
 
-TIG_OBJS = tig.o util.o io.o graph.o refs.o $(COMPAT_OBJS)
+override CPPFLAGS += $(COMPAT_CPPFLAGS) $(HASHTAB_CPPFLAGS)
+
+TIG_OBJS = tig.o util.o io.o graph.o refs.o $(COMPAT_OBJS) $(HASHTAB_OBJS)
 tig: $(TIG_OBJS)
 
-TEST_GRAPH_OBJS = tools/test-graph.o util.o io.o graph.o
+TEST_GRAPH_OBJS = tools/test-graph.o util.o io.o graph.o $(HASHTAB_OBJS)
 tools/test-graph: $(TEST_GRAPH_OBJS)
 
 OBJS = $(sort $(TIG_OBJS) $(TEST_GRAPH_OBJS))
