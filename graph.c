@@ -828,41 +828,45 @@ graph_symbol_to_chtype(struct graph_symbol *symbol)
 		else
 			graphics[1] = 'o'; //ACS_DIAMOND; //'*';
 		return graphics;
-	}
 
-	if (symbol->merge) {
+	} else if (graph_symbol_cross_over(symbol)) {
 		graphics[0] = ACS_HLINE;
-		if (symbol->branch)
-			graphics[1] = ACS_RTEE;
-		else
-			graphics[1] = ACS_URCORNER;
-		return graphics;
-	}
-
-	if (symbol->branch) {
-		graphics[0] = ACS_HLINE;
-		if (symbol->branched) {
-			if (symbol->vbranch)
-				graphics[1] = ACS_BTEE;
-			else
-				graphics[1] = ACS_LRCORNER;
-			return graphics;
-		}
-
-		if (!symbol->vbranch)
-			graphics[0] = ' ';
 		graphics[1] = ACS_VLINE;
-		if (symbol->collapse) {
-			graphics[0] = ' ';
-			graphics[1] = ACS_ULCORNER;
-		}
-		return graphics;
-	}
 
-	if (symbol->vbranch) {
+	} else if (graph_symbol_vertical_bar(symbol)) {
+		graphics[0] = ' ';
+		graphics[1] = ACS_VLINE;
+
+	} else if (graph_symbol_turn_left(symbol)) {
+		graphics[0] = ACS_HLINE;
+		graphics[1] = ACS_LRCORNER;
+
+	} else if (graph_symbol_multi_branch(symbol)) {
+		graphics[0] = ACS_HLINE;
+		graphics[1] = ACS_BTEE;
+
+	} else if (graph_symbol_horizontal_bar(symbol)) {
 		graphics[0] = graphics[1] = ACS_HLINE;
-	} else
+
+	} else if (graph_symbol_forks(symbol)) {
+		graphics[0] = ' ';
+		graphics[1] = ACS_LTEE;
+
+	} else if (graph_symbol_turn_down(symbol)) {
+		graphics[0] = ' ';
+		graphics[1] = ACS_ULCORNER;
+
+	} else if (graph_symbol_merge(symbol)) {
+		graphics[0] = ACS_HLINE;
+		graphics[1] = ACS_URCORNER;
+
+	} else if (graph_symbol_multi_merge(symbol)) {
+		graphics[0] = ACS_HLINE;
+		graphics[1] = ACS_TTEE;
+
+	} else {
 		graphics[0] = graphics[1] = ' ';
+	}
 
 	return graphics;
 }
@@ -880,27 +884,32 @@ graph_symbol_to_ascii(struct graph_symbol *symbol)
 		return " *";
 	}
 
-	if (symbol->merge) {
-		if (symbol->branch)
-			return "-+";
-		return "-.";
-	}
+	if (graph_symbol_cross_over(symbol))
+		return "-|";
 
-	if (symbol->branch) {
-		if (symbol->branched) {
-			if (symbol->vbranch)
-				return "-+";
-			return "-'";
-		}
-		if (symbol->vbranch)
-			return "-|";
-		if (symbol->collapse)
-			return " .";
+	if (graph_symbol_vertical_bar(symbol))
 		return " |";
-	}
 
-	if (symbol->vbranch)
+	if (graph_symbol_turn_left(symbol))
+		return "-'";
+
+	if (graph_symbol_multi_branch(symbol))
+		return "-+";
+
+	if (graph_symbol_horizontal_bar(symbol))
 		return "--";
+
+	if (graph_symbol_forks(symbol))
+		return " +";
+
+	if (graph_symbol_turn_down(symbol))
+		return " .";
+
+	if (graph_symbol_merge(symbol))
+		return "-.";
+
+	if (graph_symbol_multi_merge(symbol))
+		return "-+";
 
 	return "  ";
 }
