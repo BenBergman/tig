@@ -400,6 +400,21 @@ shift_left(struct graph_row *row, struct graph_row *prev_row, int pos)
 }
 
 static bool
+new_column(struct graph_row *row, struct graph_row *prev_row, int pos)
+{
+	if (!graph_column_has_commit(&prev_row->columns[pos]))
+		return true;
+
+	int i;
+	for (i = 0; i < row->size; i++) {
+		if (strcmp(row->columns[pos].id, prev_row->columns[i].id) == 0)
+			return false;
+	}
+
+	return true;
+}
+
+static bool
 continued_right(struct graph_row *row, int pos, int commit_pos)
 {
 	int i, end;
@@ -531,7 +546,7 @@ graph_insert_parents(struct graph *graph)
 		symbol->next_right = continued_right(next_row, pos, 0);
 		symbol->matches_commit = (strcmp(column->id, graph->id) == 0);
 		symbol->shift_left = shift_left(row, prev_row, pos);
-		symbol->new_column = (!graph_column_has_commit(&prev_row->columns[pos]));
+		symbol->new_column = new_column(row, prev_row, pos);
 		symbol->empty = (!graph_column_has_commit(&row->columns[pos]));
 
 		char *id = next_row->columns[pos].id;
@@ -609,6 +624,9 @@ graph_symbol_cross_over(struct graph_symbol *symbol)
 		return false;
 
 	if (!symbol->continued_down)
+		return false;
+
+	if (!(symbol->continued_up || symbol->new_column || symbol->below_commit))
 		return false;
 
 	if (symbol->shift_left)
