@@ -821,7 +821,7 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		return " │";
 
 	if (graph_symbol_turn_left(symbol))
-		return "─┘";
+		return "─╯";
 
 	if (graph_symbol_multi_branch(symbol))
 		return "─┴";
@@ -833,13 +833,13 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 		return " ├";
 
 	if (graph_symbol_turn_down_cross_over(symbol))
-		return "─┌";
+		return "─╭";
 
 	if (graph_symbol_turn_down(symbol))
-		return " ┌";
+		return " ╭";
 
 	if (graph_symbol_merge(symbol))
-		return "─┐";
+		return "─╮";
 
 	if (graph_symbol_multi_merge(symbol))
 		return "─┬";

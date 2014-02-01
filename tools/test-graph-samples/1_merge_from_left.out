@@ -1,5 +1,5 @@
-●─┐ Commit A - Merge C into B
-│ ●─┐ Commit C - Merge D into B
-●─┘ │ Commit B after E
-● ┌─┘ Commit E after D
-◎─┘ Commit D
+●─╮ Commit A - Merge C into B
+│ ●─╮ Commit C - Merge D into B
+●─╯ │ Commit B after E
+● ╭─╯ Commit E after D
+◎─╯ Commit D

@@ -1,6 +1,6 @@
-●─┐ On fix-graph: debug printout stuff
+●─╮ On fix-graph: debug printout stuff
 │ ● index on fix-graph: 85e82d0 One more fix
-●─┘ One more fix
+●─╯ One more fix
 ● Another fix
 ● Use pre-generated next row
 ● Add function to pre-generate next row
@@ -27,7 +27,7 @@
 │ ● Move request definitions to request.h
 │ ● Move view macro to tig.h
 │ ● Move enums and various utility methods to util module
-●─┘ Refactor defined enum maps to contain size information
+●─╯ Refactor defined enum maps to contain size information
 ● Detect renames when generating the announcement
 ● Fix warning about uninitialized lineno variable
 ● Set the commit reference when opening the blame view from the blob view

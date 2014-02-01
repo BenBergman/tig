@@ -1,12 +1,12 @@
-●─┬─┬─┬─┬─┐ Commit A - merge H, B, C, D, and E
+●─┬─┬─┬─┬─╮ Commit A - merge H, B, C, D, and E
 │ ● │ │ │ │ Commit B - after K
 │ │ ● │ │ │ Commit C - after H
 │ │ │ │ ● │ Commit J - after I
 │ │ │ ● │ │ Commit D - after K
 │ │ │ │ │ ● Commit E - after F
-│ ●─│─┘ │ │ Commit K - after F
-│ ├─│─┌─┘─┘ Commit F - merge G and H
-│ ●─│─│─┐ Commit F - merge G and H
+│ ●─│─╯ │ │ Commit K - after F
+│ ├─│─╭─╯─╯ Commit F - merge G and H
+│ ●─│─│─╮ Commit F - merge G and H
 │ ● │ │ │ Commit G - after I
-●─│─┴─│─┘ Commit H - after I
-◎─┴───┘ Commit I
+●─│─┴─│─╯ Commit H - after I
+◎─┴───╯ Commit I
