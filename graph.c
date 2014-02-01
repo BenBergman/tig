@@ -673,6 +673,21 @@ graph_symbol_turn_left(struct graph_symbol *symbol)
 }
 
 const bool
+graph_symbol_turn_down_cross_over(struct graph_symbol *symbol)
+{
+	if (!symbol->continued_down)
+		return false;
+
+	if (!symbol->continued_right)
+		return false;
+
+	if (!symbol->parent_right)
+		return false;
+
+	return true;
+}
+
+const bool
 graph_symbol_turn_down(struct graph_symbol *symbol)
 {
 	if (!symbol->continued_down)
@@ -817,6 +832,9 @@ graph_symbol_to_utf8(struct graph_symbol *symbol)
 	if (graph_symbol_forks(symbol))
 		return " ├";
 
+	if (graph_symbol_turn_down_cross_over(symbol))
+		return "─┌";
+
 	if (graph_symbol_turn_down(symbol))
 		return " ┌";
 
@@ -869,6 +887,10 @@ graph_symbol_to_chtype(struct graph_symbol *symbol)
 		graphics[0] = ' ';
 		graphics[1] = ACS_LTEE;
 
+	} else if (graph_symbol_turn_down_cross_over(symbol)) {
+		graphics[0] = ACS_HLINE;
+		graphics[1] = ACS_ULCORNER;
+
 	} else if (graph_symbol_turn_down(symbol)) {
 		graphics[0] = ' ';
 		graphics[1] = ACS_ULCORNER;
@@ -918,6 +940,9 @@ graph_symbol_to_ascii(struct graph_symbol *symbol)
 
 	if (graph_symbol_forks(symbol))
 		return " +";
+
+	if (graph_symbol_turn_down_cross_over(symbol))
+		return "-.";
 
 	if (graph_symbol_turn_down(symbol))
 		return " .";
