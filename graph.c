@@ -754,6 +754,9 @@ graph_symbol_vertical_bar(struct graph_symbol *symbol)
 const bool
 graph_symbol_horizontal_bar(struct graph_symbol *symbol)
 {
+	if (symbol->shift_left)
+		return true;
+
 	if (symbol->continued_down)
 		return false;
 
