@@ -521,33 +521,24 @@ graph_insert_parents(struct graph *graph)
 		struct graph_column *column = &row->columns[pos];
 		struct graph_symbol *symbol = &column->symbol;
 
-		if (pos == graph->position) {
-			if (next_row->columns[pos].symbol.boundary)
-				symbol->boundary = true;
-
-			symbol->commit = true;
-
-			if (commits_in_row(parents) < 1)
-				symbol->initial = true;
-
-			if (commits_in_row(parents) > 1)
-				symbol->merge = true;
-		}
-
-		symbol->continued_down = continued_down(row, next_row, pos);
-		symbol->continued_up = continued_down(prev_row, row, pos);
-		symbol->continued_right = continued_right(row, pos, graph->position);
-		symbol->continued_left = continued_left(row, pos, graph->position);
+		symbol->boundary          = (pos == graph->position && next_row->columns[pos].symbol.boundary);
+		symbol->commit            = (pos == graph->position);
+		symbol->initial           = (commits_in_row(parents) < 1);
+		symbol->merge             = (commits_in_row(parents) > 1);
+		symbol->continued_down    = continued_down(row, next_row, pos);
+		symbol->continued_up      = continued_down(prev_row, row, pos);
+		symbol->continued_right   = continued_right(row, pos, graph->position);
+		symbol->continued_left    = continued_left(row, pos, graph->position);
 		symbol->continued_up_left = continued_left(prev_row, pos, prev_row->size);
-		symbol->below_commit = pos == graph->prev_position;
-		symbol->parent_down = parent_down(parents, next_row, pos);
-		symbol->parent_right = (pos > graph->position && parent_right(parents, row, next_row, pos));
-		symbol->flanked = flanked(row, pos, graph->position, graph->id);
-		symbol->next_right = continued_right(next_row, pos, 0);
-		symbol->matches_commit = (strcmp(column->id, graph->id) == 0);
-		symbol->shift_left = shift_left(row, prev_row, pos);
-		symbol->new_column = new_column(row, prev_row, pos);
-		symbol->empty = (!graph_column_has_commit(&row->columns[pos]));
+		symbol->below_commit      = (pos == graph->prev_position);
+		symbol->parent_down       = parent_down(parents, next_row, pos);
+		symbol->parent_right      = (pos > graph->position && parent_right(parents, row, next_row, pos));
+		symbol->flanked           = flanked(row, pos, graph->position, graph->id);
+		symbol->next_right        = continued_right(next_row, pos, 0);
+		symbol->matches_commit    = (strcmp(column->id, graph->id) == 0);
+		symbol->shift_left        = shift_left(row, prev_row, pos);
+		symbol->new_column        = new_column(row, prev_row, pos);
+		symbol->empty             = (!graph_column_has_commit(&row->columns[pos]));
 
 		char *id = next_row->columns[pos].id;
 		if (graph_column_has_commit(column)) {
@@ -632,7 +623,7 @@ graph_symbol_cross_over(struct graph_symbol *symbol)
 	if (symbol->shift_left)
 		return false;
 
-	if (symbol->parent_right)
+	if (symbol->parent_right && symbol->merge)
 		return true;
 
 	if (symbol->flanked)
@@ -644,7 +635,7 @@ graph_symbol_cross_over(struct graph_symbol *symbol)
 const bool
 graph_symbol_turn_left(struct graph_symbol *symbol)
 {
-	if (symbol->continued_right && !symbol->continued_down)
+	if (symbol->matches_commit && symbol->continued_right && !symbol->continued_down)
 		return false;
 
 	if (symbol->continued_up || symbol->new_column || symbol->below_commit) {
@@ -684,7 +675,13 @@ graph_symbol_turn_down_cross_over(struct graph_symbol *symbol)
 	if (!symbol->parent_right)
 		return false;
 
-	return true;
+	if (symbol->flanked)
+		return true;
+
+	if (symbol->merge)
+		return true;
+
+	return false;
 }
 
 const bool
