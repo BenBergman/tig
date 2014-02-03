@@ -48,6 +48,8 @@ struct graph_symbol {
 	unsigned int next_right:1;
 	unsigned int matches_commit:1;
 	unsigned int shift_left:1;
+	unsigned int continue_shift:1;
+	unsigned int below_shift:1;
 	unsigned int new_column:1;
 	unsigned int empty:1;
 };

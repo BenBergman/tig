@@ -537,6 +537,8 @@ graph_insert_parents(struct graph *graph)
 		symbol->next_right        = continued_right(next_row, pos, 0);
 		symbol->matches_commit    = (strcmp(column->id, graph->id) == 0);
 		symbol->shift_left        = shift_left(row, prev_row, pos);
+		symbol->continue_shift    = shift_left(row, prev_row, pos + 1);
+		symbol->below_shift       = prev_row->columns[pos].symbol.shift_left;
 		symbol->new_column        = new_column(row, prev_row, pos);
 		symbol->empty             = (!graph_column_has_commit(&row->columns[pos]));
 
@@ -636,6 +638,9 @@ const bool
 graph_symbol_turn_left(struct graph_symbol *symbol)
 {
 	if (symbol->matches_commit && symbol->continued_right && !symbol->continued_down)
+		return false;
+
+	if (symbol->continue_shift)
 		return false;
 
 	if (symbol->continued_up || symbol->new_column || symbol->below_commit) {
@@ -779,6 +784,9 @@ graph_symbol_multi_branch(struct graph_symbol *symbol)
 		return false;
 
 	if (!symbol->continued_right)
+		return false;
+
+	if (symbol->below_shift)
 		return false;
 
 	if (symbol->continued_up || symbol->new_column || symbol->below_commit) {
