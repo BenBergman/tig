@@ -20,20 +20,12 @@
 
 struct graph_symbol {
 	unsigned int color:8;
-	unsigned int bold:1;
 
 	unsigned int commit:1;
-	unsigned int branch:1;
-
 	unsigned int boundary:1;
 	unsigned int initial:1;
 	unsigned int merge:1;
 
-	unsigned int vbranch:1;
-	unsigned int branched:1;
-	unsigned int collapse:1;
-
-	// For new symbol system:
 	unsigned int continued_down:1;
 	unsigned int continued_up:1;
 	unsigned int continued_right:1;
@@ -47,9 +39,11 @@ struct graph_symbol {
 	unsigned int flanked:1;
 	unsigned int next_right:1;
 	unsigned int matches_commit:1;
+
 	unsigned int shift_left:1;
 	unsigned int continue_shift:1;
 	unsigned int below_shift:1;
+
 	unsigned int new_column:1;
 	unsigned int empty:1;
 };
@@ -88,8 +82,6 @@ struct graph {
 	bool has_parents;
 	bool is_boundary;
 };
-
-void colors_init(struct colors *colors);
 
 void done_graph(struct graph *graph);
 

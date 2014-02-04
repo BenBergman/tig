@@ -114,7 +114,7 @@ colors_get_free_color(struct colors *colors)
 	return free_color;
 }
 
-void
+static void
 colors_init(struct colors *colors)
 {
 	if (colors->id_map == NULL) {
@@ -143,7 +143,9 @@ get_color(struct graph *graph, char *new_id)
 void
 done_graph(struct graph *graph)
 {
+	free(graph->prev_row.columns);
 	free(graph->row.columns);
+	free(graph->next_row.columns);
 	free(graph->parents.columns);
 	memset(graph, 0, sizeof(*graph));
 }
@@ -210,10 +212,6 @@ static bool
 graph_needs_expansion(struct graph *graph)
 {
 	return graph->position + graph->parents.size > graph->row.size;
-#if 0
-	return graph->parents.size > 1
-	    && graph->expanded < graph->parents.size;
-#endif
 }
 
 static bool
@@ -222,11 +220,12 @@ graph_expand(struct graph *graph)
 	while (graph_needs_expansion(graph)) {
 		if (!graph_insert_column(graph, &graph->prev_row, graph->prev_row.size, ""))
 			return FALSE;
+
 		if (!graph_insert_column(graph, &graph->row, graph->row.size, ""))
 			return FALSE;
+
 		if (!graph_insert_column(graph, &graph->next_row, graph->next_row.size, ""))
 			return FALSE;
-		graph->expanded++;
 	}
 
 	return TRUE;
@@ -249,27 +248,6 @@ graph_collapse(struct graph *graph)
 	}
 
 	return TRUE;
-}
-
-static void
-graph_reorder_parents(struct graph *graph)
-{
-	struct graph_row *row = &graph->row;
-	struct graph_row *parents = &graph->parents;
-	int i;
-
-	if (parents->size == 1)
-		return;
-
-	for (i = 0; i < parents->size; i++) {
-		struct graph_column *column = &parents->columns[i];
-		size_t match = graph_find_column_by_id(row, column->id);
-
-		if (match < graph->position && graph_column_has_commit(&row->columns[match])) {
-			//die("Reorder: %s -> %s", graph->commit->id, column->id);
-//			row->columns[match].symbol.initial = 1;
-		}
-	}
 }
 
 static void
@@ -351,33 +329,25 @@ graph_commit_next_row(struct graph *graph)
 	int i;
 	for (i = 0; i < graph->row.size; i++) {
 		graph->prev_row.columns[i] = graph->row.columns[i];
+
 		if (i == graph->position)
 			graph->prev_row.columns[i] = graph->next_row.columns[i];
-		graph->prev_position = graph->position;
+
 		graph->row.columns[i] = graph->next_row.columns[i];
 	}
+	graph->prev_position = graph->position;
 }
-
-//static bool
-//is_parent(struct graph *graph, const char *id)
-//{
-//	int i;
-//
-//	for (i = 0; i < graph->parents.size; i++) {
-//		if (!strcmp(id, graph->parents.columns[i].id))
-//			return true;
-//	}
-//	return false;
-//}
 
 static bool
 continued_down(struct graph_row *row, struct graph_row *next_row, int pos)
 {
-	if (strcmp(row->columns[pos].id, next_row->columns[pos].id) == 0)
-		if (!row->columns[pos].symbol.shift_left)
-			return true;
+	if (strcmp(row->columns[pos].id, next_row->columns[pos].id) != 0)
+		return false;
 
-	return false;
+	if (row->columns[pos].symbol.shift_left)
+		return false;
+
+	return true;
 }
 
 static bool
@@ -388,12 +358,16 @@ shift_left(struct graph_row *row, struct graph_row *prev_row, int pos)
 		return false;
 
 	for (i = pos - 1; i >= 0; i--) {
-		if (graph_column_has_commit(&row->columns[i]))
-			if (strcmp(row->columns[i].id, row->columns[pos].id) == 0) {
-				if (!continued_down(prev_row, row, i))
-					return true;
-				break;
-			}
+		if (!graph_column_has_commit(&row->columns[i]))
+			continue;
+
+		if (strcmp(row->columns[i].id, row->columns[pos].id) != 0)
+			continue;
+
+		if (!continued_down(prev_row, row, i))
+			return true;
+
+		break;
 	}
 
 	return false;
@@ -423,9 +397,10 @@ continued_right(struct graph_row *row, int pos, int commit_pos)
 	else
 		end = row->size;
 
-	for (i = pos + 1; i < end; i++)
+	for (i = pos + 1; i < end; i++) {
 		if (strcmp(row->columns[pos].id, row->columns[i].id) == 0)
 			return true;
+	}
 
 	return false;
 }
@@ -439,9 +414,13 @@ continued_left(struct graph_row *row, int pos, int commit_pos)
 	else
 		start = commit_pos;
 
-	for (i = start; i < pos; i++)
-		if (graph_column_has_commit(&row->columns[i]) && strcmp(row->columns[pos].id, row->columns[i].id) == 0)
+	for (i = start; i < pos; i++) {
+		if (!graph_column_has_commit(&row->columns[i]))
+			continue;
+
+		if (strcmp(row->columns[pos].id, row->columns[i].id) == 0)
 			return true;
+	}
 
 	return false;
 }
@@ -450,9 +429,13 @@ static bool
 parent_down(struct graph_row *parents, struct graph_row *next_row, int pos)
 {
 	int parent;
-	for (parent = 0; parent < parents->size; parent++)
-		if (graph_column_has_commit(&parents->columns[parent]) && strcmp(parents->columns[parent].id, next_row->columns[pos].id) == 0)
+	for (parent = 0; parent < parents->size; parent++) {
+		if (!graph_column_has_commit(&parents->columns[parent]))
+			continue;
+
+		if (strcmp(parents->columns[parent].id, next_row->columns[pos].id) == 0)
 			return true;
+	}
 
 	return false;
 }
@@ -461,13 +444,18 @@ static bool
 parent_right(struct graph_row *parents, struct graph_row *row, struct graph_row *next_row, int pos)
 {
 	int parent, i;
-	for (parent = 0; parent < parents->size; parent++)
-		if (graph_column_has_commit(&parents->columns[parent]))
-			for (i = pos + 1; i < next_row->size; i++)
-				if (strcmp(parents->columns[parent].id, next_row->columns[i].id) == 0)
-					if (strcmp(parents->columns[parent].id, row->columns[i].id) != 0)
-			//		if (!continued_left(next_row, i, next_row->size))
-						return true;
+	for (parent = 0; parent < parents->size; parent++) {
+		if (!graph_column_has_commit(&parents->columns[parent]))
+			continue;
+
+		for (i = pos + 1; i < next_row->size; i++) {
+			if (strcmp(parents->columns[parent].id, next_row->columns[i].id) != 0)
+				continue;
+
+			if (strcmp(parents->columns[parent].id, row->columns[i].id) != 0)
+				return true;
+		}
+	}
 
 	return false;
 }
@@ -483,11 +471,15 @@ flanked(struct graph_row *row, int pos, int commit_pos, const char *commit_id)
 	else
 		min = commit_pos;
 
-	for (before = min; before < pos; before++)
-		for (after = pos + 1; after < max; after++)
-			if (strcmp(row->columns[before].id, row->columns[after].id) == 0)
-				if (strcmp(row->columns[before].id, commit_id) == 0)
-					return true;
+	for (before = min; before < pos; before++) {
+		for (after = pos + 1; after < max; after++) {
+			if (strcmp(row->columns[before].id, row->columns[after].id) != 0)
+				continue;
+
+			if (strcmp(row->columns[before].id, commit_id) == 0)
+				return true;
+		}
+	}
 
 	return false;
 }
@@ -497,9 +489,10 @@ commits_in_row(struct graph_row *row)
 {
 	int count = 0;
 	int i;
-	for (i = 0; i < row->size;i++)
+	for (i = 0; i < row->size;i++) {
 		if (graph_column_has_commit(&row->columns[i]))
 			count++;
+	}
 
 	return count;
 }
@@ -521,24 +514,29 @@ graph_insert_parents(struct graph *graph)
 		struct graph_column *column = &row->columns[pos];
 		struct graph_symbol *symbol = &column->symbol;
 
-		symbol->boundary          = (pos == graph->position && next_row->columns[pos].symbol.boundary);
 		symbol->commit            = (pos == graph->position);
+		symbol->boundary          = (pos == graph->position && next_row->columns[pos].symbol.boundary);
 		symbol->initial           = (commits_in_row(parents) < 1);
 		symbol->merge             = (commits_in_row(parents) > 1);
+
 		symbol->continued_down    = continued_down(row, next_row, pos);
 		symbol->continued_up      = continued_down(prev_row, row, pos);
 		symbol->continued_right   = continued_right(row, pos, graph->position);
 		symbol->continued_left    = continued_left(row, pos, graph->position);
 		symbol->continued_up_left = continued_left(prev_row, pos, prev_row->size);
-		symbol->below_commit      = (pos == graph->prev_position);
+
 		symbol->parent_down       = parent_down(parents, next_row, pos);
 		symbol->parent_right      = (pos > graph->position && parent_right(parents, row, next_row, pos));
+
+		symbol->below_commit      = (pos == graph->prev_position);
 		symbol->flanked           = flanked(row, pos, graph->position, graph->id);
 		symbol->next_right        = continued_right(next_row, pos, 0);
 		symbol->matches_commit    = (strcmp(column->id, graph->id) == 0);
+
 		symbol->shift_left        = shift_left(row, prev_row, pos);
 		symbol->continue_shift    = shift_left(row, prev_row, pos + 1);
 		symbol->below_shift       = prev_row->columns[pos].symbol.shift_left;
+
 		symbol->new_column        = new_column(row, prev_row, pos);
 		symbol->empty             = (!graph_column_has_commit(&row->columns[pos]));
 
@@ -554,7 +552,7 @@ graph_insert_parents(struct graph *graph)
 	graph_commit_next_row(graph);
 	colors_remove_id(&graph->colors, graph->id);
 
-	graph->parents.size = graph->expanded = graph->position = 0;
+	graph->parents.size = graph->position = 0;
 
 	return TRUE;
 }
@@ -564,7 +562,6 @@ graph_render_parents(struct graph *graph)
 {
 	if (!graph_expand(graph))
 		return FALSE;
-	graph_reorder_parents(graph);
 	graph_insert_parents(graph);
 	if (!graph_collapse(graph))
 		return FALSE;
@@ -651,20 +648,6 @@ graph_symbol_turn_left(struct graph_symbol *symbol)
 			return true;
 	}
 
-//	if (symbol->continued_down)
-//		if (symbol->continued_left)
-//			return true;
-//
-//	if (symbol->continued_up)
-//		if (symbol->continued_left)
-//			if (!symbol->continued_up_left)
-//				return true;
-//
-//	if (!symbol->parent_down)
-//		if (!symbol->continued_right)
-//			if (!symbol->continued_down)
-//				return true;
-
 	return false;
 }
 
@@ -737,12 +720,11 @@ graph_symbol_vertical_bar(struct graph_symbol *symbol)
 	if (symbol->shift_left)
 		return false;
 
-	if (symbol->continued_up)
-		if (symbol->continued_down)
-			return true;
-
 	if (!symbol->continued_down)
 		return false;
+
+	if (symbol->continued_up)
+		return true;
 
 	if (symbol->parent_right)
 		return false;
@@ -796,15 +778,6 @@ graph_symbol_multi_branch(struct graph_symbol *symbol)
 		if (symbol->shift_left)
 			return true;
 	}
-
-//	if (!symbol->continued_down)
-//		if (symbol->parent_right || symbol->continued_right) {
-//			if ((symbol->continued_up && !symbol->continued_up_left))
-//				return true;
-//
-//			if (symbol->below_commit)
-//				return true;
-//		}
 
 	return false;
 }
