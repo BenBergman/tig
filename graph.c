@@ -477,22 +477,19 @@ parent_right(struct graph_row *parents, struct graph_row *row, struct graph_row 
 static bool
 flanked(struct graph_row *row, int pos, int commit_pos, const char *commit_id)
 {
-	int before, after;
-	int min = 0;
-	int max = row->size;
-	if (pos < commit_pos)
-		max = commit_pos;
-	else
-		min = commit_pos;
+	int start, end;
+	if (pos < commit_pos) {
+		start = 0;
+		end = pos;
+	} else {
+		start = pos + 1;
+		end = row->size;
+	}
 
-	for (before = min; before < pos; before++) {
-		for (after = pos + 1; after < max; after++) {
-			if (strcmp(row->columns[before].id, row->columns[after].id) != 0)
-				continue;
-
-			if (strcmp(row->columns[before].id, commit_id) == 0)
-				return true;
-		}
+	int i;
+	for (i = start; i < end; i++) {
+		if (strcmp(row->columns[i].id, commit_id) == 0)
+			return true;
 	}
 
 	return false;
