@@ -273,20 +273,22 @@ graph_row_clear_commit(struct graph_row *row, const char *id)
 static void
 graph_insert_parents(struct graph *graph)
 {
-	struct graph_row *row = &graph->next_row;
+	struct graph_row *prev_row = &graph->prev_row;
+	struct graph_row *row = &graph->row;
+	struct graph_row *next_row = &graph->next_row;
 	struct graph_row *parents = &graph->parents;
 
 	int i;
 	for (i = 0; i < parents->size; i++) {
 		struct graph_column *new = &parents->columns[i];
 		if (graph_column_has_commit(new)) {
-			size_t match = graph_find_free_column(row);
-			if (match == row->size && row->columns[row->size - 1].id) {
-				graph_insert_column(graph, row, row->size, new->id);
-				graph_insert_column(graph, &graph->row, graph->row.size, "");
-				graph_insert_column(graph, &graph->prev_row, graph->prev_row.size, "");
+			size_t match = graph_find_free_column(next_row);
+			if (match == next_row->size && next_row->columns[next_row->size - 1].id) {
+				graph_insert_column(graph, next_row, next_row->size, new->id);
+				graph_insert_column(graph, row, row->size, "");
+				graph_insert_column(graph, prev_row, prev_row->size, "");
 			} else {
-				row->columns[match] = *new;
+				next_row->columns[match] = *new;
 			}
 		}
 	}
@@ -296,16 +298,20 @@ static void
 graph_remove_collapsed_columns(struct graph *graph)
 {
 	struct graph_row *row = &graph->next_row;
-	struct graph_row *parents = &graph->parents;
 
 	int i;
-	int last = row->size - 1;
-	for (last = row->size; last > 0; last--) {
-		if (last != graph->position + 1 && last != graph->position)
-			if (strcmp(row->columns[last].id, graph->id) != 0)
-				if (strcmp(row->columns[last].id, row->columns[last - 1].id) == 0)
-					if (strcmp(row->columns[last - 1].id, graph->prev_row.columns[last - 1].id) != 0 || graph->prev_row.columns[last - 1].symbol.shift_left)
-						row->columns[last] = row->columns[last + 1];
+	for (i = row->size - 1; i > 0; i--) {
+		if (!(i != graph->position + 1 && i != graph->position))
+			continue;
+
+		if (strcmp(row->columns[i].id, graph->id) == 0)
+			continue;
+
+		if (strcmp(row->columns[i].id, row->columns[i - 1].id) != 0)
+			continue;
+
+		if (strcmp(row->columns[i - 1].id, graph->prev_row.columns[i - 1].id) != 0 || graph->prev_row.columns[i - 1].symbol.shift_left)
+			row->columns[i] = row->columns[i + 1];
 	}
 }
 
@@ -313,12 +319,11 @@ static void
 graph_fill_empty_columns(struct graph *graph)
 {
 	struct graph_row *row = &graph->next_row;
-	struct graph_row *parents = &graph->parents;
 
 	int i;
 	for (i = row->size - 2; i >= 0; i--) {
 		if (!graph_column_has_commit(&row->columns[i])) {
-			row->columns[i] = *(&row->columns[i+1]);
+			row->columns[i] = row->columns[i + 1];
 		}
 	}
 }
@@ -553,6 +558,7 @@ graph_generate_symbols(struct graph *graph)
 
 		graph_canvas_append_symbol(graph, symbol);
 	}
+	colors_remove_id(&graph->colors, graph->id);
 }
 
 bool
@@ -564,7 +570,6 @@ graph_render_parents(struct graph *graph)
 	graph_generate_next_row(graph);
 	graph_generate_symbols(graph);
 	graph_commit_next_row(graph);
-	colors_remove_id(&graph->colors, graph->id);
 
 	graph->parents.size = graph->position = 0;
 
