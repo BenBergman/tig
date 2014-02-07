@@ -31,8 +31,8 @@
 │ │ ├─│─╯
 │ │ ●─│─╮ Commit 5 - merge 7 and 9
 ●─│─│─│─│─╮ Commit 6 - merge A and 9
-◎─│─│─│─│─╯ Commit A
-◎─╯ │ │ │ Commit L
-◎───╯ │ │ Commit 7
-◎─────╯ │ Commit 8
-◎───────╯ Commit 9
+◎ │ │ │ │ │ Commit A
+◎─╯ │ │ │ │ Commit L
+◎───╯ │ │ │ Commit 7
+◎─────╯ │ │ Commit 8
+◎───────┴─╯ Commit 9
