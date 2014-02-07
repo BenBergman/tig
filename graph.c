@@ -301,7 +301,10 @@ graph_remove_collapsed_columns(struct graph *graph)
 
 	int i;
 	for (i = row->size - 1; i > 0; i--) {
-		if (!(i != graph->position + 1 && i != graph->position))
+		if (i == graph->position)
+			continue;
+
+		if (i == graph->position + 1)
 			continue;
 
 		if (strcmp(row->columns[i].id, graph->id) == 0)
