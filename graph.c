@@ -682,9 +682,6 @@ graph_symbol_turn_down_cross_over(struct graph_symbol *symbol)
 	if (!symbol->continued_right)
 		return false;
 
-	if (!symbol->parent_right)
-		return false;
-
 	if (symbol->flanked)
 		return true;
 
