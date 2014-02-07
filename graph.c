@@ -360,6 +360,9 @@ graph_commit_next_row(struct graph *graph)
 		if (i == graph->position && commits_in_row(&graph->parents) > 0)
 			graph->prev_row.columns[i] = graph->next_row.columns[i];
 
+		if (!graph_column_has_commit(&graph->prev_row.columns[i]))
+			graph->prev_row.columns[i] = graph->next_row.columns[i];
+
 		graph->row.columns[i] = graph->next_row.columns[i];
 	}
 	graph->prev_position = graph->position;
@@ -407,7 +410,7 @@ new_column(struct graph_row *row, struct graph_row *prev_row, int pos)
 		return true;
 
 	int i;
-	for (i = 0; i < row->size; i++) {
+	for (i = pos; i < row->size; i++) {
 		if (strcmp(row->columns[pos].id, prev_row->columns[i].id) == 0)
 			return false;
 	}
@@ -508,6 +511,18 @@ flanked(struct graph_row *row, int pos, int commit_pos, const char *commit_id)
 	return false;
 }
 
+static bool
+below_commit(int pos, struct graph *graph)
+{
+	if (!pos == graph->prev_position)
+		return false;
+
+	if (!strcmp(graph->row.columns[pos].id, graph->prev_row.columns[pos].id) == 0)
+		return false;
+
+	return true;
+}
+
 static void
 graph_generate_symbols(struct graph *graph)
 {
@@ -535,7 +550,7 @@ graph_generate_symbols(struct graph *graph)
 		symbol->parent_down       = parent_down(parents, next_row, pos);
 		symbol->parent_right      = (pos > graph->position && parent_right(parents, row, next_row, pos));
 
-		symbol->below_commit      = (pos == graph->prev_position);
+		symbol->below_commit      = below_commit(pos, graph);
 		symbol->flanked           = flanked(row, pos, graph->position, graph->id);
 		symbol->next_right        = continued_right(next_row, pos, 0);
 		symbol->matches_commit    = (strcmp(column->id, graph->id) == 0);
@@ -623,7 +638,7 @@ graph_symbol_cross_over(struct graph_symbol *symbol)
 	if (!symbol->continued_down)
 		return false;
 
-	if (!(symbol->continued_up || symbol->new_column || symbol->below_commit))
+	if (!symbol->continued_up && !symbol->new_column && !symbol->below_commit)
 		return false;
 
 	if (symbol->shift_left)
