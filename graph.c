@@ -186,7 +186,7 @@ graph_insert_column(struct graph *graph, struct graph_row *row, size_t pos, cons
 {
 	struct graph_column *column;
 
-	if (!realloc_graph_columns(&row->columns, row->size, 2))
+	if (!realloc_graph_columns(&row->columns, row->size, 1))
 		return NULL;
 
 	column = &row->columns[pos];
