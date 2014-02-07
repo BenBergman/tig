@@ -294,6 +294,20 @@ graph_insert_parents(struct graph *graph)
 	}
 }
 
+static bool
+commit_is_in_row(const char *id, struct graph_row *row)
+{
+	int i;
+	for (i = 0; i < row->size; i++) {
+		if (!graph_column_has_commit(&row->columns[i]))
+			continue;
+
+		if (strcmp(id, row->columns[i].id) == 0)
+			return true;
+	}
+	return false;
+}
+
 static void
 graph_remove_collapsed_columns(struct graph *graph)
 {
@@ -311,6 +325,9 @@ graph_remove_collapsed_columns(struct graph *graph)
 			continue;
 
 		if (strcmp(row->columns[i].id, row->columns[i - 1].id) != 0)
+			continue;
+
+		if (commit_is_in_row(row->columns[i].id, &graph->parents) && !graph_column_has_commit(&graph->prev_row.columns[i]))
 			continue;
 
 		if (strcmp(row->columns[i - 1].id, graph->prev_row.columns[i - 1].id) != 0 || graph->prev_row.columns[i - 1].symbol.shift_left)
