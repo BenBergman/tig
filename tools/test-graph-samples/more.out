@@ -28,7 +28,7 @@
 ●─│───╯ Commit U - after 3
 ●─│─┬─╮ Commit 3 - merge 4, 5, and 8
 ●─│─│─│─╮ Commit 4 - merge 6 and 5
-│ │ ├─│─╯ Commit 5 - merge 7 and 9
+│ │ ├─│─╯
 │ │ ●─│─╮ Commit 5 - merge 7 and 9
 ●─│─│─│─│─╮ Commit 6 - merge A and 9
 ◎─│─│─│─│─╯ Commit A
