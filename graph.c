@@ -337,6 +337,19 @@ graph_generate_next_row(struct graph *graph)
 	graph_fill_empty_columns(graph);
 }
 
+static int
+commits_in_row(struct graph_row *row)
+{
+	int count = 0;
+	int i;
+	for (i = 0; i < row->size;i++) {
+		if (graph_column_has_commit(&row->columns[i]))
+			count++;
+	}
+
+	return count;
+}
+
 static void
 graph_commit_next_row(struct graph *graph)
 {
@@ -344,7 +357,7 @@ graph_commit_next_row(struct graph *graph)
 	for (i = 0; i < graph->row.size; i++) {
 		graph->prev_row.columns[i] = graph->row.columns[i];
 
-		if (i == graph->position)
+		if (i == graph->position && commits_in_row(&graph->parents) > 0)
 			graph->prev_row.columns[i] = graph->next_row.columns[i];
 
 		graph->row.columns[i] = graph->next_row.columns[i];
@@ -493,19 +506,6 @@ flanked(struct graph_row *row, int pos, int commit_pos, const char *commit_id)
 	}
 
 	return false;
-}
-
-static int
-commits_in_row(struct graph_row *row)
-{
-	int count = 0;
-	int i;
-	for (i = 0; i < row->size;i++) {
-		if (graph_column_has_commit(&row->columns[i]))
-			count++;
-	}
-
-	return count;
 }
 
 static void
