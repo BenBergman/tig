@@ -26,6 +26,7 @@ struct id_color *
 id_color_new(const char *id, size_t color)
 {
 	struct id_color *node = malloc(sizeof(struct id_color));
+
 	node->id = (char *) malloc(strlen(id) + 1);
 	strcpy(node->id, id);
 	node->color = color;
@@ -91,6 +92,7 @@ colors_get_color(struct colors *colors, const char *id)
 {
 	struct id_color *key = id_color_new(id, 0);
 	struct id_color *node = (struct id_color *) htab_find(colors->id_map, key);
+
 	id_color_delete(key);
 
 	if (node == NULL) {
@@ -105,6 +107,7 @@ colors_get_free_color(struct colors *colors)
 	size_t free_color = 0;
 	size_t lowest = (size_t) -1; // Max value of size_t
 	int i;
+
 	for (i = 0; i < ARRAY_SIZE(colors->count); i++) {
 		if (colors->count[i] < lowest) {
 			lowest = colors->count[i];
@@ -119,6 +122,7 @@ colors_init(struct colors *colors)
 {
 	if (colors->id_map == NULL) {
 		uint size = 500;
+
 		colors->id_map = htab_create_alloc(size, id_color_hash, id_color_eq, key_del, calloc, free);
 	}
 }
@@ -126,15 +130,16 @@ colors_init(struct colors *colors)
 static size_t
 get_color(struct graph *graph, char *new_id)
 {
+	size_t color;
+
 	colors_init(&graph->colors);
-	size_t color = colors_get_color(&graph->colors, new_id);
+	color = colors_get_color(&graph->colors, new_id);
 
 	if (color < (size_t) -1) {
 		return color;
 	}
 
 	color = colors_get_free_color(&graph->colors);
-
 	colors_add_id(&graph->colors, new_id, color);
 
 	return color;
@@ -263,6 +268,7 @@ static void
 graph_row_clear_commit(struct graph_row *row, const char *id)
 {
 	int i;
+
 	for (i = 0; i < row->size; i++) {
 		if (strcmp(row->columns[i].id, id) == 0) {
 			row->columns[i].id[0] = 0;
@@ -277,12 +283,14 @@ graph_insert_parents(struct graph *graph)
 	struct graph_row *row = &graph->row;
 	struct graph_row *next_row = &graph->next_row;
 	struct graph_row *parents = &graph->parents;
-
 	int i;
+
 	for (i = 0; i < parents->size; i++) {
 		struct graph_column *new = &parents->columns[i];
+
 		if (graph_column_has_commit(new)) {
 			size_t match = graph_find_free_column(next_row);
+
 			if (match == next_row->size && next_row->columns[next_row->size - 1].id) {
 				graph_insert_column(graph, next_row, next_row->size, new->id);
 				graph_insert_column(graph, row, row->size, "");
@@ -298,6 +306,7 @@ static bool
 commit_is_in_row(const char *id, struct graph_row *row)
 {
 	int i;
+
 	for (i = 0; i < row->size; i++) {
 		if (!graph_column_has_commit(&row->columns[i]))
 			continue;
@@ -312,8 +321,8 @@ static void
 graph_remove_collapsed_columns(struct graph *graph)
 {
 	struct graph_row *row = &graph->next_row;
-
 	int i;
+
 	for (i = row->size - 1; i > 0; i--) {
 		if (i == graph->position)
 			continue;
@@ -339,8 +348,8 @@ static void
 graph_fill_empty_columns(struct graph *graph)
 {
 	struct graph_row *row = &graph->next_row;
-
 	int i;
+
 	for (i = row->size - 2; i >= 0; i--) {
 		if (!graph_column_has_commit(&row->columns[i])) {
 			row->columns[i] = row->columns[i + 1];
@@ -362,6 +371,7 @@ commits_in_row(struct graph_row *row)
 {
 	int count = 0;
 	int i;
+
 	for (i = 0; i < row->size;i++) {
 		if (graph_column_has_commit(&row->columns[i]))
 			count++;
@@ -374,6 +384,7 @@ static void
 graph_commit_next_row(struct graph *graph)
 {
 	int i;
+
 	for (i = 0; i < graph->row.size; i++) {
 		graph->prev_row.columns[i] = graph->row.columns[i];
 
@@ -385,6 +396,7 @@ graph_commit_next_row(struct graph *graph)
 
 		graph->row.columns[i] = graph->next_row.columns[i];
 	}
+
 	graph->prev_position = graph->position;
 }
 
@@ -404,6 +416,7 @@ static bool
 shift_left(struct graph_row *row, struct graph_row *prev_row, int pos)
 {
 	int i;
+
 	if (!graph_column_has_commit(&row->columns[pos]))
 		return false;
 
@@ -426,10 +439,11 @@ shift_left(struct graph_row *row, struct graph_row *prev_row, int pos)
 static bool
 new_column(struct graph_row *row, struct graph_row *prev_row, int pos)
 {
+	int i;
+
 	if (!graph_column_has_commit(&prev_row->columns[pos]))
 		return true;
 
-	int i;
 	for (i = pos; i < row->size; i++) {
 		if (strcmp(row->columns[pos].id, prev_row->columns[i].id) == 0)
 			return false;
@@ -442,6 +456,7 @@ static bool
 continued_right(struct graph_row *row, int pos, int commit_pos)
 {
 	int i, end;
+
 	if (pos < commit_pos)
 		end = commit_pos;
 	else
@@ -459,6 +474,7 @@ static bool
 continued_left(struct graph_row *row, int pos, int commit_pos)
 {
 	int i, start;
+
 	if (pos < commit_pos)
 		start = 0;
 	else
@@ -479,6 +495,7 @@ static bool
 parent_down(struct graph_row *parents, struct graph_row *next_row, int pos)
 {
 	int parent;
+
 	for (parent = 0; parent < parents->size; parent++) {
 		if (!graph_column_has_commit(&parents->columns[parent]))
 			continue;
@@ -494,6 +511,7 @@ static bool
 parent_right(struct graph_row *parents, struct graph_row *row, struct graph_row *next_row, int pos)
 {
 	int parent, i;
+
 	for (parent = 0; parent < parents->size; parent++) {
 		if (!graph_column_has_commit(&parents->columns[parent]))
 			continue;
@@ -513,7 +531,8 @@ parent_right(struct graph_row *parents, struct graph_row *row, struct graph_row 
 static bool
 flanked(struct graph_row *row, int pos, int commit_pos, const char *commit_id)
 {
-	int start, end;
+	int i, start, end;
+
 	if (pos < commit_pos) {
 		start = 0;
 		end = pos;
@@ -522,7 +541,6 @@ flanked(struct graph_row *row, int pos, int commit_pos, const char *commit_id)
 		end = row->size;
 	}
 
-	int i;
 	for (i = start; i < end; i++) {
 		if (strcmp(row->columns[i].id, commit_id) == 0)
 			return true;
@@ -555,6 +573,7 @@ graph_generate_symbols(struct graph *graph)
 	for (pos = 0; pos < row->size; pos++) {
 		struct graph_column *column = &row->columns[pos];
 		struct graph_symbol *symbol = &column->symbol;
+		char *id = next_row->columns[pos].id;
 
 		symbol->commit            = (pos == graph->position);
 		symbol->boundary          = (pos == graph->position && next_row->columns[pos].symbol.boundary);
@@ -582,7 +601,6 @@ graph_generate_symbols(struct graph *graph)
 		symbol->new_column        = new_column(row, prev_row, pos);
 		symbol->empty             = (!graph_column_has_commit(&row->columns[pos]));
 
-		char *id = next_row->columns[pos].id;
 		if (graph_column_has_commit(column)) {
 			id = column->id;
 		}
@@ -590,6 +608,7 @@ graph_generate_symbols(struct graph *graph)
 
 		graph_canvas_append_symbol(graph, symbol);
 	}
+
 	colors_remove_id(&graph->colors, graph->id);
 }
 
