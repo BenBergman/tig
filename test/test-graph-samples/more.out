@@ -2,8 +2,7 @@
 │ │ ● │ Commit D - after B
 │ ● │ │ Commit C - after F
 │ │ │ ● Commit E - after H
-├─│─╯ │
-●─│─╮ │ Commit B - merge H and F
+●─│─╯ │ Commit B - merge H and F
 │ ●─╯ │ Commit F - after G
 │ ● ╭─╯ Commit G - after H
 ●─┴─╯ Commit H - after I
@@ -28,8 +27,7 @@
 ●─│───╯ Commit U - after 3
 ●─│─┬─╮ Commit 3 - merge 4, 5, and 8
 ●─│─│─│─╮ Commit 4 - merge 6 and 5
-│ │ ├─│─╯
-│ │ ●─│─╮ Commit 5 - merge 7 and 9
+│ │ ●─│─╯ Commit 5 - merge 7 and 9
 ●─│─│─│─│─╮ Commit 6 - merge A and 9
 ◎ │ │ │ │ │ Commit A
 ◎─╯ │ │ │ │ Commit L
