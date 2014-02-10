@@ -14,7 +14,7 @@
 #ifndef TIG_GRAPH_H
 #define TIG_GRAPH_H
 
-#include "hashtab.h"
+#include "compat/hashtab.h"
 
 #define GRAPH_COLORS	7
 

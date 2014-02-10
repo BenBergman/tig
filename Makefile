@@ -175,15 +175,15 @@ COMPAT_CPPFLAGS += -DNO_SETENV
 COMPAT_OBJS += compat/setenv.o
 endif
 
-HASHTAB_CPPFLAGS = -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STDINT_H
-HASHTAB_OBJS = hashtab.o
+COMPAT_CPPFLAGS += -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STDINT_H
+COMPAT_OBJS += compat/hashtab.o
 
-override CPPFLAGS += $(COMPAT_CPPFLAGS) $(HASHTAB_CPPFLAGS)
+override CPPFLAGS += $(COMPAT_CPPFLAGS)
 
-TIG_OBJS = tig.o util.o io.o graph.o refs.o $(COMPAT_OBJS) $(HASHTAB_OBJS)
+TIG_OBJS = tig.o util.o io.o graph.o refs.o $(COMPAT_OBJS)
 tig: $(TIG_OBJS)
 
-TEST_GRAPH_OBJS = tools/test-graph.o util.o io.o graph.o $(HASHTAB_OBJS)
+TEST_GRAPH_OBJS = tools/test-graph.o util.o io.o graph.o $(COMPAT_OBJS)
 tools/test-graph: $(TEST_GRAPH_OBJS)
 
 OBJS = $(sort $(TIG_OBJS) $(TEST_GRAPH_OBJS))
